@@ -120,6 +120,7 @@ public class Lexer {
                     return new Token(TokenType.AND, "&&", line);
                 } else {
                     errors.add(new Error(line, "a"));
+                    return new Token(TokenType.AND, "&", line);
                 }
             } else if (ch == '|') {
                 pos++;
@@ -128,6 +129,7 @@ public class Lexer {
                     return new Token(TokenType.OR, "||", line);
                 } else {
                     errors.add(new Error(line, "a"));
+                    return new Token(TokenType.OR, "|", line);
                 }
             } else if (ch == '/') {
                 pos++;
