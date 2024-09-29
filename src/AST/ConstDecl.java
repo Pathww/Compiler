@@ -1,7 +1,6 @@
 package AST;
 
 import Lexer.Token;
-import Lexer.TokenType;
 
 import java.util.ArrayList;
 

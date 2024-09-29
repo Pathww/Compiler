@@ -11,7 +11,7 @@ public class LOrExp {
         this.lAndExp = lAndExp;
     }
 
-    public LOrExp( LOrExp lOrExp, Token or,LAndExp lAndExp) {
+    public LOrExp(LOrExp lOrExp, Token or, LAndExp lAndExp) {
         this.lOrExp = lOrExp;
         this.or = or;
         this.lAndExp = lAndExp;

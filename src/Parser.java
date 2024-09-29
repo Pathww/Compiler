@@ -1,8 +1,7 @@
 import AST.*;
 import AST.Character;
 import AST.Number;
-import Lexer.Token;
-import Lexer.TokenType;
+import Lexer.*;
 import Error.*;
 
 import java.util.ArrayList;
@@ -12,14 +11,14 @@ public class Parser {
     private int size;
     private int pos = -1;
     private Token curToken;
-    private Token eofTk = new Token(TokenType.EOFTK, "", 0);
     private ErrorHandler errorHandler;
+    private Token eofTk = new Token(TokenType.EOFTK, "", 0);
 
     public Parser(ArrayList<Token> tokens, ErrorHandler errorHandler) {
         this.tokens = tokens;
-        size = tokens.size();
-        next();
+        this.size = tokens.size();
         this.errorHandler = errorHandler;
+        next();
     }
 
     public void next() {
@@ -28,23 +27,17 @@ public class Parser {
             curToken = tokens.get(pos);
         } else {
             curToken = eofTk;
-            /*
-             *
-             * QQQQ?
-             * */
         }
     }
 
     public Token preRead(int offset) {
-        if (pos + offset < size) {
+        if (pos + offset >= 0 && pos + offset < size) {
             return tokens.get(pos + offset);
         } else {
             return eofTk;
         }
     }
 
-
-    //检查报错的情况！！！别忘了next！！！
     public CompUnit parseCompUnit() {
         ArrayList<Decl> decls = new ArrayList<>();
         ArrayList<FuncDef> funcDefs = new ArrayList<>();
@@ -83,8 +76,7 @@ public class Parser {
             next();
             constDefs.add(parseConstDef());
         }
-        Token semicn = curToken;
-        next();
+        Token semicn = parseError(TokenType.SEMICN);
         return new ConstDecl(constTk, bType, constDefs, commas, semicn);
     }
 
@@ -103,14 +95,12 @@ public class Parser {
             lbr = curToken;
             next();
             constExp = parseConstExp();
-            rbr = curToken;
-            next();
+            rbr = parseError(TokenType.RBRACK);
         }
         Token assign = curToken;
         next();
         ConstInitVal constInitVal = parseConstInitVal();
         return new ConstDef(ident, lbr, constExp, rbr, assign, constInitVal);
-
     }
 
     private ConstInitVal parseConstInitVal() {
@@ -149,8 +139,7 @@ public class Parser {
             next();
             varDefs.add(parseVarDef());
         }
-        Token semicn = curToken;
-        next();
+        Token semicn = parseError(TokenType.SEMICN);
         return new VarDecl(bType, varDefs, commas, semicn);
     }
 
@@ -164,8 +153,7 @@ public class Parser {
             lbr = curToken;
             next();
             constExp = parseConstExp();
-            rbr = curToken;
-            next();
+            rbr = parseError(TokenType.RBRACK);
         }
         if (curToken.getType() == TokenType.ASSIGN) {
             assign = curToken;
@@ -197,9 +185,8 @@ public class Parser {
             next();
             return new InitVal(lbr, exps, commas, rbr);
         } else {
-            return new InitVal(parseExp()); //TODO:可以复合吗？？？
+            return new InitVal(parseExp());
         }
-
     }
 
     private FuncDef parseFuncDef() {
@@ -209,14 +196,12 @@ public class Parser {
         Token lbr = curToken;
         next();
         FuncFParams funcFParams = null;
-        if (curToken.getType() != TokenType.RPARENT) {
+        if (curToken.getType() != TokenType.RPARENT && curToken.getType() != TokenType.LBRACE) {
             funcFParams = parseFuncFParams();
         }
-        Token rbr = curToken;
-        next();
+        Token rbr = parseError(TokenType.RPARENT);
         Block block = parseBlock();
         return new FuncDef(funcType, ident, lbr, funcFParams, rbr, block);
-
     }
 
     private MainFuncDef parseMainFuncDef() {
@@ -226,8 +211,7 @@ public class Parser {
         next();
         Token lparent = curToken;
         next();
-        Token rparent = curToken;
-        next();
+        Token rparent = parseError(TokenType.RPARENT);
         Block block = parseBlock();
         return new MainFuncDef(intTk, mainTk, lparent, rparent, block);
 
@@ -258,8 +242,7 @@ public class Parser {
         if (curToken.getType() == TokenType.LBRACK) {
             Token lbr = curToken;
             next();
-            Token rbr = curToken;
-            next();
+            Token rbr = parseError(TokenType.RBRACK);
             return new FuncFParam(bType, ident, lbr, rbr);
         }
         return new FuncFParam(bType, ident);
@@ -294,8 +277,7 @@ public class Parser {
             Token lbr = curToken;
             next();
             Cond cond = parseCond();
-            Token rbr = curToken;
-            next();
+            Token rbr = parseError(TokenType.RPARENT);
             Stmt ifStmt = parseStmt();
             Token elseTk = null;
             Stmt elseStmt = null;
@@ -332,24 +314,21 @@ public class Parser {
         } else if (curToken.getType() == TokenType.BREAKTK) {
             Token breakTk = curToken;
             next();
-            Token semicn = curToken;
-            next();
+            Token semicn = parseError(TokenType.SEMICN);
             return new StmtBreak(breakTk, semicn);
         } else if (curToken.getType() == TokenType.CONTINUETK) {
             Token continueTk = curToken;
             next();
-            Token semicn = curToken;
-            next();
+            Token semicn = parseError(TokenType.SEMICN);
             return new StmtContinue(continueTk, semicn);
         } else if (curToken.getType() == TokenType.RETURNTK) {
             Token returnTk = curToken;
             next();
             Exp exp = null;
-            if (curToken.getType() != TokenType.SEMICN) {
+            if (curToken.getType() == TokenType.LPARENT || curToken.getType() == TokenType.IDENFR || curToken.getType() == TokenType.INTCON || curToken.getType() == TokenType.CHRCON || curToken.getType() == TokenType.PLUS || curToken.getType() == TokenType.MINU || curToken.getType() == TokenType.NOT) {
                 exp = parseExp();
             }
-            Token semicn = curToken;
-            next();
+            Token semicn = parseError(TokenType.SEMICN);
             return new StmtReturn(returnTk, exp, semicn);
         } else if (curToken.getType() == TokenType.PRINTFTK) {
             Token printfTk = curToken;
@@ -366,47 +345,38 @@ public class Parser {
                 next();
                 exps.add(parseExp());
             }
-            Token rbr = curToken;
-            next();
-            Token semicn = curToken;
-            next();
+            Token rbr = parseError(TokenType.RPARENT);
+            Token semicn = parseError(TokenType.SEMICN);
             return new StmtPrintf(printfTk, lbr, strCon, commas, exps, rbr, semicn);
         } else {
-            for (int i = 0; i < size; i++) {
-                TokenType type = preRead(i).getType();
-                if (type == TokenType.ASSIGN) {
-                    LVal lVal = parseLVal();
-                    Token assign = curToken;
+            if (curToken.getType() == TokenType.SEMICN) {
+                Token semicn = curToken;
+                next();
+                return new StmtExp(null, semicn);
+            }
+            Exp exp = parseExp();
+            if (curToken.getType() == TokenType.ASSIGN) {
+                LVal lVal = exp.toLVal();
+                Token assign = curToken;
+                next();
+                if (curToken.getType() == TokenType.GETINTTK || curToken.getType() == TokenType.GETCHARTK) {
+                    Token getTk = curToken;
                     next();
-                    if (curToken.getType() == TokenType.GETINTTK || curToken.getType() == TokenType.GETCHARTK) {
-                        Token getTk = curToken;
-                        next();
-                        Token lparent = curToken;
-                        next();
-                        Token rparent = curToken;
-                        next();
-                        Token semicn = curToken;
-                        next();
-                        return new StmtGet(lVal, assign, getTk, lparent, rparent, semicn);
-                    } else {
-                        Exp exp = parseExp();
-                        Token semicn = curToken;
-                        next();
-                        return new StmtAssign(lVal, assign, exp, semicn);
-                    }
-
-                } else if (type == TokenType.SEMICN) {
-                    Exp exp = null;
-                    if (curToken.getType() != TokenType.SEMICN) {
-                        exp = parseExp();
-                    }
-                    Token semicn = curToken;
+                    Token lparent = curToken;
                     next();
-                    return new StmtExp(exp, semicn);
+                    Token rparent = parseError(TokenType.RPARENT);
+                    Token semicn = parseError(TokenType.SEMICN);
+                    return new StmtGet(lVal, assign, getTk, lparent, rparent, semicn);
+                } else {
+                    Exp rexp = parseExp();
+                    Token semicn = parseError(TokenType.SEMICN);
+                    return new StmtAssign(lVal, assign, rexp, semicn);
                 }
+            } else {
+                Token semicn = parseError(TokenType.SEMICN);
+                return new StmtExp(exp, semicn);
             }
         }
-        return null;
     }
 
 
@@ -433,8 +403,7 @@ public class Parser {
             Token lbr = curToken;
             next();
             Exp exp = parseExp();
-            Token rbr = curToken;
-            next();
+            Token rbr = parseError(TokenType.RBRACK);
             return new LVal(ident, lbr, exp, rbr);
         }
         return new LVal(ident);
@@ -445,8 +414,7 @@ public class Parser {
             Token lparent = curToken;
             next();
             Exp exp = parseExp();
-            Token rparent = curToken;
-            next();
+            Token rparent = parseError(TokenType.RPARENT);
             return new PrimaryExp(lparent, exp, rparent);
         } else if (curToken.getType() == TokenType.INTCON) {
             return new PrimaryExp(parseNumber());
@@ -480,11 +448,10 @@ public class Parser {
             Token lparent = curToken;
             next();
             FuncRParams funcRParams = null;
-            if (curToken.getType() != TokenType.RPARENT) {
+            if (curToken.getType() == TokenType.LPARENT || curToken.getType() == TokenType.IDENFR || curToken.getType() == TokenType.INTCON || curToken.getType() == TokenType.CHRCON || curToken.getType() == TokenType.PLUS || curToken.getType() == TokenType.MINU || curToken.getType() == TokenType.NOT) {
                 funcRParams = parseFuncRParams();
             }
-            Token rparent = curToken;
-            next();
+            Token rparent = parseError(TokenType.RPARENT);
             return new UnaryExp(ident, lparent, funcRParams, rparent);
         } else {
             return new UnaryExp(parsePrimaryExp());
@@ -516,7 +483,7 @@ public class Parser {
             Token op = curToken;
             next();
             unaryExp = parseUnaryExp();
-            mulExp = new MulExp(mulExp, op, unaryExp); //对吗？？？？？
+            mulExp = new MulExp(mulExp, op, unaryExp);
         }
         return mulExp;
     }
@@ -583,5 +550,26 @@ public class Parser {
 
     private ConstExp parseConstExp() {
         return new ConstExp(parseAddExp());
+    }
+
+    private Token parseError(TokenType type) {
+        if (curToken.getType() != type) {
+            int line = preRead(-1).getLine();
+            switch (type) {
+                case SEMICN:
+                    errorHandler.addError(line, ErrorType.i);
+                    return new Token(type, ";", line);
+                case RPARENT:
+                    errorHandler.addError(line, ErrorType.j);
+                    return new Token(type, ")", line);
+                default: // case RBRACK:
+                    errorHandler.addError(line, ErrorType.k);
+                    return new Token(type, "]", line);
+            }
+        } else {
+            Token token = curToken;
+            next();
+            return token;
+        }
     }
 }

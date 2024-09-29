@@ -2,9 +2,10 @@ package AST;
 
 import Lexer.Token;
 
-public class StmtBreak implements Stmt{
+public class StmtBreak implements Stmt {
     private Token breakTk;
     private Token semicn;
+
     public StmtBreak(Token breakTk, Token semicn) {
         this.breakTk = breakTk;
         this.semicn = semicn;

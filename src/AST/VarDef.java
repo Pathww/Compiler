@@ -49,9 +49,7 @@ public class VarDef {
             sb.append(assign);
             sb.append(initVal);
         }
-
         sb.append("<VarDef>\n");
         return sb.toString();
     }
-
 }

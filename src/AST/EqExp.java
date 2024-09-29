@@ -21,7 +21,7 @@ public class EqExp {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (eqExp != null) {
-            sb.append(eqExp.toString());
+            sb.append(eqExp);
             sb.append(op.toString());
         }
         sb.append(relExp.toString());

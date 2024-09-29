@@ -9,6 +9,10 @@ public class Error {
         this.type = type;
     }
 
+    public int getLine() {
+        return line;
+    }
+
     @Override
     public String toString() {
         return line + " " + type + "\n";

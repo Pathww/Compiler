@@ -16,7 +16,7 @@ public class Decl {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (constDecl != null) {
-            sb.append(constDecl.toString());
+            sb.append(constDecl);
         } else {
             sb.append(varDecl.toString());
         }

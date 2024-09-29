@@ -28,5 +28,4 @@ public class MainFuncDef {
         sb.append("<MainFuncDef>\n");
         return sb.toString();
     }
-
 }

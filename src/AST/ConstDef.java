@@ -2,9 +2,7 @@ package AST;
 
 import Lexer.Token;
 
-
 public class ConstDef {
-
     private Token ident;
 
     private Token lbrack = null;

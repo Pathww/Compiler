@@ -7,6 +7,11 @@ public class Exp {
         this.addExp = addExp;
     }
 
+
+    public LVal toLVal() {
+        return addExp.toLVal();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

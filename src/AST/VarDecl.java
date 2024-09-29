@@ -31,5 +31,4 @@ public class VarDecl {
         sb.append("<VarDecl>\n");
         return sb.toString();
     }
-
 }

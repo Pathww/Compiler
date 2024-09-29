@@ -31,5 +31,4 @@ public class StmtGet implements Stmt {
         sb.append("<Stmt>\n");
         return sb.toString();
     }
-
 }

@@ -2,14 +2,14 @@ package AST;
 
 import Lexer.Token;
 
-public class StmtIf implements Stmt{
+public class StmtIf implements Stmt {
     private Token ifTk;
     private Token lparent;
     private Cond cond;
     private Token rparent;
     private Stmt ifStmt;
-    private Token elseTk=null;
-    private Stmt elseStmt=null;
+    private Token elseTk = null;
+    private Stmt elseStmt = null;
 
     public StmtIf(Token ifTk, Token lparent, Cond cond, Token rparent, Stmt ifStmt) {
         this.ifTk = ifTk;
@@ -19,7 +19,7 @@ public class StmtIf implements Stmt{
         this.ifStmt = ifStmt;
     }
 
-    public StmtIf(Token ifTk, Token lparent, Cond cond, Token rparent, Stmt ifStmt,Token elseTk, Stmt elseStmt) {
+    public StmtIf(Token ifTk, Token lparent, Cond cond, Token rparent, Stmt ifStmt, Token elseTk, Stmt elseStmt) {
         this.ifTk = ifTk;
         this.lparent = lparent;
         this.cond = cond;

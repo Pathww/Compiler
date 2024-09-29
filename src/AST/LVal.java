@@ -9,7 +9,6 @@ public class LVal {
     private Exp exp = null;
     private Token rbrack = null;
 
-
     public LVal(Token ident) {
         this.ident = ident;
     }

@@ -16,25 +16,18 @@ public class Compiler {
         }
         input.close();
 
-        ArrayList<Token> tokens = new ArrayList<>();
         ErrorHandler errorHandler = new ErrorHandler();
-        Lexer lexer = new Lexer(sb.toString(), tokens, errorHandler);
+
+        Lexer lexer = new Lexer(sb.toString(), errorHandler);
+        ArrayList<Token> tokens = lexer.analyse();
+
         Parser parser = new Parser(tokens, errorHandler);
         CompUnit compUnit = parser.parseCompUnit();
 
         FileWriter fw = new FileWriter("parser.txt");
         fw.write(compUnit.toString());
-//        for (Token token : tokens) {
-//            fw.write(token.toString());
-//        }
-//        while (true) {
-//            Token token = lexer.next();
-//            if (token.getType() == Lexer.TokenType.EOFTK) {
-//                break;
-//            }
-//            fw.write(token.toString() + '\n');
-//        }
         fw.close();
+
         FileWriter error = new FileWriter("error.txt");
         error.write(errorHandler.toString());
         error.close();

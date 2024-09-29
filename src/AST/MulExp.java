@@ -19,6 +19,10 @@ public class MulExp {
         this.unaryExp = unaryExp;
     }
 
+    public LVal toLVal() {
+        return unaryExp.toLVal();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

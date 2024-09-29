@@ -35,6 +35,10 @@ public class UnaryExp {
         this.unaryExp = unaryExp;
     }
 
+    public LVal toLVal() {
+        return primaryExp.toLVal();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -55,5 +59,4 @@ public class UnaryExp {
         sb.append("<UnaryExp>\n");
         return sb.toString();
     }
-
 }

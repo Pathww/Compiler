@@ -31,6 +31,10 @@ public class PrimaryExp {
         this.character = character;
     }
 
+    public LVal toLVal() {
+        return lVal;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

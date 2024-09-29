@@ -12,8 +12,7 @@ public class RelExp {
         this.addExp = addExp;
     }
 
-    public RelExp( RelExp relExp, Token op,AddExp addExp) {
-
+    public RelExp(RelExp relExp, Token op, AddExp addExp) {
         this.relExp = relExp;
         this.op = op;
         this.addExp = addExp;
@@ -23,7 +22,7 @@ public class RelExp {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (relExp != null) {
-            sb.append(relExp.toString());
+            sb.append(relExp);
             sb.append(op.toString());
         }
         sb.append(addExp.toString());

@@ -23,10 +23,9 @@ public class StmtReturn implements Stmt {
         StringBuilder sb = new StringBuilder();
         sb.append(returnTk.toString());
         if (exp != null) {
-            sb.append(exp.toString());
+            sb.append(exp);
         }
         sb.append(semicn.toString());
-
         sb.append("<Stmt>\n");
         return sb.toString();
     }

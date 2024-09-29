@@ -1,29 +1,27 @@
 package Lexer;
 
+import Error.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import Error.*;
 
 public class Lexer {
     private String input;
     private int length;
     private int pos = 0;
     private int line = 1;
+    private ArrayList<Token> tokens = new ArrayList<>();
     private HashMap<String, TokenType> keywords = new HashMap<>();
-    ArrayList<Token> tokens;
     private ErrorHandler errorHandler;
 
-    public Lexer(String input, ArrayList<Token> tokens, ErrorHandler errorHandler) {
+    public Lexer(String input, ErrorHandler errorHandler) {
         initKeywords();
         this.input = input;
         this.length = input.length() - 1; // \n
-        this.tokens = tokens;
-        this.errorHandler= errorHandler;
-        analyse();
+        this.errorHandler = errorHandler;
     }
 
-    public void analyse() {
+    public ArrayList<Token> analyse() {
         while (pos < length) {
             char ch = input.charAt(pos);
             if (isAlpha(ch) || ch == '_') {
@@ -126,7 +124,7 @@ public class Lexer {
                     pos++;
                     tokens.add(new Token(TokenType.AND, "&&", line));
                 } else {
-                    errorHandler.addError(line,ErrorType.a);
+                    errorHandler.addError(line, ErrorType.a);
                     tokens.add(new Token(TokenType.AND, "&", line));
                 }
             } else if (ch == '|') {
@@ -135,7 +133,7 @@ public class Lexer {
                     pos++;
                     tokens.add(new Token(TokenType.OR, "||", line));
                 } else {
-                    errorHandler.addError(line,ErrorType.a);
+                    errorHandler.addError(line, ErrorType.a);
                     tokens.add(new Token(TokenType.OR, "|", line));
                 }
             } else if (ch == '/') {
@@ -201,6 +199,7 @@ public class Lexer {
                 pos++;
             }
         }
+        return tokens;
     }
 
     private void initKeywords() {

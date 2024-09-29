@@ -13,7 +13,7 @@ public class StmtFor implements Stmt {
     private Token rparent;
     private Stmt stmt;
 
-    public StmtFor(Token forTk, Token lparent, ForStmt forStmt1, Token semicn1, Cond cond, Token semicn2, ForStmt forStmt2,Token rparent, Stmt stmt) {
+    public StmtFor(Token forTk, Token lparent, ForStmt forStmt1, Token semicn1, Cond cond, Token semicn2, ForStmt forStmt2, Token rparent, Stmt stmt) {
         this.forTk = forTk;
         this.lparent = lparent;
         this.forStmt1 = forStmt1;
@@ -24,7 +24,6 @@ public class StmtFor implements Stmt {
         this.rparent = rparent;
         this.stmt = stmt;
     }
-
 
     public void addForStmt1(ForStmt forStmt1) {
         this.forStmt1 = forStmt1;
@@ -44,15 +43,15 @@ public class StmtFor implements Stmt {
         sb.append(forTk.toString());
         sb.append(lparent.toString());
         if (forStmt1 != null) {
-            sb.append(forStmt1.toString());
+            sb.append(forStmt1);
         }
         sb.append(semicn1.toString());
         if (cond != null) {
-            sb.append(cond.toString());
+            sb.append(cond);
         }
         sb.append(semicn2.toString());
         if (forStmt2 != null) {
-            sb.append(forStmt2.toString());
+            sb.append(forStmt2);
         }
         sb.append(rparent.toString());
         sb.append(stmt.toString());

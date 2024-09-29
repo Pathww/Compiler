@@ -1,7 +1,8 @@
 package AST;
 
-public class StmtBlock implements Stmt{
+public class StmtBlock implements Stmt {
     private Block block;
+
     public StmtBlock(Block block) {
         this.block = block;
     }

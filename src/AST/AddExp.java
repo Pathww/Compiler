@@ -3,7 +3,6 @@ package AST;
 import Lexer.Token;
 
 public class AddExp {
-
     private MulExp mulExp = null;
     private AddExp addExp = null;
     private Token op = null;
@@ -18,15 +17,21 @@ public class AddExp {
         this.mulExp = mulExp;
     }
 
+    public LVal toLVal() {
+        return mulExp.toLVal();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (addExp != null) {
-            sb.append(addExp.toString());
+            sb.append(addExp);
             sb.append(op.toString());
         }
         sb.append(mulExp.toString());
         sb.append("<AddExp>\n");
         return sb.toString();
     }
+
+
 }
