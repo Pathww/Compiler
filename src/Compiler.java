@@ -2,6 +2,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import AST.CompUnit;
+import Lexer.*;
+import Error.*;
+
 public class Compiler {
     public static void main(String[] args) throws IOException {
         InputStream input = new FileInputStream("testfile.txt");
@@ -11,22 +15,28 @@ public class Compiler {
             sb.append(scanner.nextLine()).append('\n');
         }
         input.close();
-        ArrayList<Error> errors = new ArrayList<>();
-        Lexer lexer = new Lexer(sb.toString(), errors);
-//        Parser parser = new Parser(lexer);
-        FileWriter fw = new FileWriter("lexer.txt");
-        while (true) {
-            Token token = lexer.next();
-            if (token.getType() == TokenType.EOFTK) {
-                break;
-            }
-            fw.write(token.toString() + '\n');
-        }
+
+        ArrayList<Token> tokens = new ArrayList<>();
+        ErrorHandler errorHandler = new ErrorHandler();
+        Lexer lexer = new Lexer(sb.toString(), tokens, errorHandler);
+        Parser parser = new Parser(tokens, errorHandler);
+        CompUnit compUnit = parser.parseCompUnit();
+
+        FileWriter fw = new FileWriter("parser.txt");
+        fw.write(compUnit.toString());
+//        for (Token token : tokens) {
+//            fw.write(token.toString());
+//        }
+//        while (true) {
+//            Token token = lexer.next();
+//            if (token.getType() == Lexer.TokenType.EOFTK) {
+//                break;
+//            }
+//            fw.write(token.toString() + '\n');
+//        }
         fw.close();
         FileWriter error = new FileWriter("error.txt");
-        for (Error e : errors) {
-            error.write(e.toString() + '\n');
-        }
+        error.write(errorHandler.toString());
         error.close();
     }
 }

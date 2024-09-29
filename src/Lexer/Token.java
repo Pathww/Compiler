@@ -1,3 +1,5 @@
+package Lexer;
+
 public class Token {
     private final TokenType type;
     private final String value;
@@ -22,6 +24,6 @@ public class Token {
     }
 
     public String toString() {
-        return type + " " + value;
+        return type + " " + value + "\n";
     }
 }

@@ -1,3 +1,5 @@
+package Lexer;
+
 public enum TokenType {
     IDENFR,     ELSETK,    VOIDTK,  SEMICN,
     INTCON,     NOT,       MULT,    COMMA,

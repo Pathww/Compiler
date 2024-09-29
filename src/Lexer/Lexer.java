@@ -1,5 +1,9 @@
+package Lexer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import Error.*;
 
 public class Lexer {
     private String input;
@@ -7,17 +11,20 @@ public class Lexer {
     private int pos = 0;
     private int line = 1;
     private HashMap<String, TokenType> keywords = new HashMap<>();
-    private ArrayList<Error> errors;
+    ArrayList<Token> tokens;
+    private ErrorHandler errorHandler;
 
-    public Lexer(String input, ArrayList<Error> errors) {
+    public Lexer(String input, ArrayList<Token> tokens, ErrorHandler errorHandler) {
         initKeywords();
         this.input = input;
         this.length = input.length() - 1; // \n
-        this.errors = errors;
+        this.tokens = tokens;
+        this.errorHandler= errorHandler;
+        analyse();
     }
 
-    public Token next() {
-        for (; pos < length; pos++) {
+    public void analyse() {
+        while (pos < length) {
             char ch = input.charAt(pos);
             if (isAlpha(ch) || ch == '_') {
                 StringBuilder sb = new StringBuilder();
@@ -29,7 +36,7 @@ public class Lexer {
                     }
                     ch = input.charAt(pos);
                 }
-                return new Token(keywords.getOrDefault(sb.toString(), TokenType.IDENFR), sb.toString(), line);
+                tokens.add(new Token(keywords.getOrDefault(sb.toString(), TokenType.IDENFR), sb.toString(), line));
             } else if (isDigit(ch)) {
                 StringBuilder sb = new StringBuilder();
                 while (isDigit(ch)) {
@@ -40,7 +47,7 @@ public class Lexer {
                     }
                     ch = input.charAt(pos);
                 }
-                return new Token(TokenType.INTCON, sb.toString(), line);
+                tokens.add(new Token(TokenType.INTCON, sb.toString(), line));
             } else if (ch == '\"') {
                 StringBuilder sb = new StringBuilder(); // null ""
                 sb.append('\"');
@@ -60,7 +67,7 @@ public class Lexer {
                     }
                     ch = input.charAt(pos);
                 }
-                return new Token(TokenType.STRCON, sb.toString(), line);
+                tokens.add(new Token(TokenType.STRCON, sb.toString(), line));
             } else if (ch == '\'') {
                 StringBuilder sb = new StringBuilder();
                 sb.append('\'');
@@ -80,56 +87,56 @@ public class Lexer {
                 }
                 pos += 2; // report error ?
                 sb.append('\'');
-                return new Token(TokenType.CHRCON, sb.toString(), line);
+                tokens.add(new Token(TokenType.CHRCON, sb.toString(), line));
             } else if (ch == '!') {
                 pos++;
                 if (pos < length && input.charAt(pos) == '=') {
                     pos++;
-                    return new Token(TokenType.NEQ, "!=", line);
+                    tokens.add(new Token(TokenType.NEQ, "!=", line));
                 } else {
-                    return new Token(TokenType.NOT, "!", line);
+                    tokens.add(new Token(TokenType.NOT, "!", line));
                 }
             } else if (ch == '<') {
                 pos++;
                 if (pos < length && input.charAt(pos) == '=') {
                     pos++;
-                    return new Token(TokenType.LEQ, "<=", line);
+                    tokens.add(new Token(TokenType.LEQ, "<=", line));
                 } else {
-                    return new Token(TokenType.LSS, "<", line);
+                    tokens.add(new Token(TokenType.LSS, "<", line));
                 }
             } else if (ch == '>') {
                 pos++;
                 if (pos < length && input.charAt(pos) == '=') {
                     pos++;
-                    return new Token(TokenType.GEQ, ">=", line);
+                    tokens.add(new Token(TokenType.GEQ, ">=", line));
                 } else {
-                    return new Token(TokenType.GRE, ">", line);
+                    tokens.add(new Token(TokenType.GRE, ">", line));
                 }
             } else if (ch == '=') {
                 pos++;
                 if (pos < length && input.charAt(pos) == '=') {
                     pos++;
-                    return new Token(TokenType.EQL, "==", line);
+                    tokens.add(new Token(TokenType.EQL, "==", line));
                 } else {
-                    return new Token(TokenType.ASSIGN, "=", line);
+                    tokens.add(new Token(TokenType.ASSIGN, "=", line));
                 }
             } else if (ch == '&') {
                 pos++;
                 if (pos < length && input.charAt(pos) == '&') {
                     pos++;
-                    return new Token(TokenType.AND, "&&", line);
+                    tokens.add(new Token(TokenType.AND, "&&", line));
                 } else {
-                    errors.add(new Error(line, "a"));
-                    return new Token(TokenType.AND, "&", line);
+                    errorHandler.addError(line,ErrorType.a);
+                    tokens.add(new Token(TokenType.AND, "&", line));
                 }
             } else if (ch == '|') {
                 pos++;
                 if (pos < length && input.charAt(pos) == '|') {
                     pos++;
-                    return new Token(TokenType.OR, "||", line);
+                    tokens.add(new Token(TokenType.OR, "||", line));
                 } else {
-                    errors.add(new Error(line, "a"));
-                    return new Token(TokenType.OR, "|", line);
+                    errorHandler.addError(line,ErrorType.a);
+                    tokens.add(new Token(TokenType.OR, "|", line));
                 }
             } else if (ch == '/') {
                 pos++;
@@ -144,54 +151,56 @@ public class Lexer {
                             line++;
                         }
                         if (input.charAt(pos) == '*' && input.charAt(pos + 1) == '/') {
-                            pos++;
+                            pos += 2;
                             break;
                         }
                     }
                 } else {
-                    return new Token(TokenType.DIV, "/", line);
+                    tokens.add(new Token(TokenType.DIV, "/", line));
                 }
             } else if (ch == '+') {
                 pos++;
-                return new Token(TokenType.PLUS, "+", line);
+                tokens.add(new Token(TokenType.PLUS, "+", line));
             } else if (ch == '-') {
                 pos++;
-                return new Token(TokenType.MINU, "-", line);
+                tokens.add(new Token(TokenType.MINU, "-", line));
             } else if (ch == '*') {
                 pos++;
-                return new Token(TokenType.MULT, "*", line);
+                tokens.add(new Token(TokenType.MULT, "*", line));
             } else if (ch == '%') {
                 pos++;
-                return new Token(TokenType.MOD, "%", line);
+                tokens.add(new Token(TokenType.MOD, "%", line));
             } else if (ch == ';') {
                 pos++;
-                return new Token(TokenType.SEMICN, ";", line);
+                tokens.add(new Token(TokenType.SEMICN, ";", line));
             } else if (ch == ',') {
                 pos++;
-                return new Token(TokenType.COMMA, ",", line);
+                tokens.add(new Token(TokenType.COMMA, ",", line));
             } else if (ch == '(') {
                 pos++;
-                return new Token(TokenType.LPARENT, "(", line);
+                tokens.add(new Token(TokenType.LPARENT, "(", line));
             } else if (ch == ')') {
                 pos++;
-                return new Token(TokenType.RPARENT, ")", line);
+                tokens.add(new Token(TokenType.RPARENT, ")", line));
             } else if (ch == '[') {
                 pos++;
-                return new Token(TokenType.LBRACK, "[", line);
+                tokens.add(new Token(TokenType.LBRACK, "[", line));
             } else if (ch == ']') {
                 pos++;
-                return new Token(TokenType.RBRACK, "]", line);
+                tokens.add(new Token(TokenType.RBRACK, "]", line));
             } else if (ch == '{') {
                 pos++;
-                return new Token(TokenType.LBRACE, "{", line);
+                tokens.add(new Token(TokenType.LBRACE, "{", line));
             } else if (ch == '}') {
                 pos++;
-                return new Token(TokenType.RBRACE, "}", line);
+                tokens.add(new Token(TokenType.RBRACE, "}", line));
             } else if (ch == '\n') {
+                pos++;
                 line++;
+            } else {
+                pos++;
             }
         }
-        return new Token(TokenType.EOFTK, "", line);
     }
 
     private void initKeywords() {
