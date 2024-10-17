@@ -1,10 +1,16 @@
 package AST;
 
+import Symbol.SymbolTable;
+
 public class ConstExp {
     private AddExp addExp;
 
     public ConstExp(AddExp addExp) {
         this.addExp = addExp;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        addExp.toSymbol(table);
     }
 
     @Override

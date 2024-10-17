@@ -1,6 +1,8 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
+import Error.*;
 
 public class StmtBreak implements Stmt {
     private Token breakTk;
@@ -9,6 +11,12 @@ public class StmtBreak implements Stmt {
     public StmtBreak(Token breakTk, Token semicn) {
         this.breakTk = breakTk;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (SymbolTable.loop == 0) {
+            ErrorHandler.addError(breakTk.getLine(), ErrorType.m);
+        }
     }
 
     @Override

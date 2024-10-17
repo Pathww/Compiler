@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class StmtFor implements Stmt {
     private Token forTk;
@@ -35,6 +36,21 @@ public class StmtFor implements Stmt {
 
     public void addCond(Cond cond) {
         this.cond = cond;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (forStmt1 != null) {
+            forStmt1.toSymbol(table);
+        }
+        if (cond != null) {
+            cond.toSymbol(table);
+        }
+        if (forStmt2 != null) {
+            forStmt2.toSymbol(table);
+        }
+        SymbolTable.loop++;
+        stmt.toSymbol(table);
+        SymbolTable.loop--;
     }
 
     @Override

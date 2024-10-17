@@ -1,6 +1,8 @@
 package AST;
 
-import Lexer.Token;
+import Lexer.*;
+import Symbol.*;
+import Error.*;
 
 public class ConstDef {
     private Token ident;
@@ -27,11 +29,33 @@ public class ConstDef {
         this.constInitVal = constInitVal;
     }
 
+    public void toSymbol(SymbolTable table, BType bType) {
+        SymbolType type;
+        if (lbrack != null) {
+            if (bType.getType() == TokenType.INTTK) {
+                type = SymbolType.ConstIntArray;
+            } else {
+                type = SymbolType.ConstCharArray;
+            }
+            constExp.toSymbol(table);
+        } else {
+            if (bType.getType() == TokenType.INTTK) {
+                type = SymbolType.ConstInt;
+            } else {
+                type = SymbolType.ConstChar;
+            }
+        }
+        if (!table.addSymbol(new Symbol(ident.getValue(), type))) {
+            ErrorHandler.addError(ident.getLine(), ErrorType.b);
+        }
+        constInitVal.toSymbol(table);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(ident.toString());
-        if (constExp != null) {
+        if (lbrack != null) {
             sb.append(lbrack);
             sb.append(constExp);
             sb.append(rbrack);

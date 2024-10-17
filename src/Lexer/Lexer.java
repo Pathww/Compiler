@@ -12,13 +12,11 @@ public class Lexer {
     private int line = 1;
     private ArrayList<Token> tokens = new ArrayList<>();
     private HashMap<String, TokenType> keywords = new HashMap<>();
-    private ErrorHandler errorHandler;
 
-    public Lexer(String input, ErrorHandler errorHandler) {
+    public Lexer(String input) {
         initKeywords();
         this.input = input;
         this.length = input.length() - 1; // \n
-        this.errorHandler = errorHandler;
     }
 
     public ArrayList<Token> analyse() {
@@ -124,7 +122,7 @@ public class Lexer {
                     pos++;
                     tokens.add(new Token(TokenType.AND, "&&", line));
                 } else {
-                    errorHandler.addError(line, ErrorType.a);
+                    ErrorHandler.addError(line, ErrorType.a);
                     tokens.add(new Token(TokenType.AND, "&", line));
                 }
             } else if (ch == '|') {
@@ -133,7 +131,7 @@ public class Lexer {
                     pos++;
                     tokens.add(new Token(TokenType.OR, "||", line));
                 } else {
-                    errorHandler.addError(line, ErrorType.a);
+                    ErrorHandler.addError(line, ErrorType.a);
                     tokens.add(new Token(TokenType.OR, "|", line));
                 }
             } else if (ch == '/') {

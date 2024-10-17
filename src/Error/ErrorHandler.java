@@ -2,19 +2,21 @@ package Error;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 
 public class ErrorHandler {
-    private ArrayList<Error> errors;
+    private static ArrayList<Error> errors = new ArrayList<>();
 
-    private Comparator<Error> cmp = (o1, o2) -> o1.getLine() - o2.getLine();
+    private static HashSet<Integer> lines = new HashSet<>();
 
+    private static Comparator<Error> cmp = (o1, o2) -> o1.getLine() - o2.getLine();
 
-    public ErrorHandler() {
-        errors = new ArrayList<>();
-    }
-
-    public void addError(int line, ErrorType type) {
+    public static void addError(int line, ErrorType type) {
+        if (lines.contains(line)) {
+            return;
+        }
         errors.add(new Error(line, type));
+        lines.add(line);
     }
 
     @Override
@@ -22,7 +24,7 @@ public class ErrorHandler {
         errors.sort(cmp);
         StringBuilder sb = new StringBuilder();
         for (Error e : errors) {
-            sb.append(e.toString());
+            sb.append(e);
         }
         return sb.toString();
     }

@@ -1,6 +1,8 @@
 package AST;
 
-import Lexer.Token;
+import Lexer.*;
+import Symbol.*;
+import Error.*;
 
 public class VarDef {
     private Token ident;
@@ -36,11 +38,35 @@ public class VarDef {
         this.initVal = initVal;
     }
 
+    public void toSymbol(SymbolTable table, BType bType) {
+        SymbolType type;
+        if (lbrack != null) {
+            if (bType.getType() == TokenType.INTTK) {
+                type = SymbolType.IntArray;
+            } else {
+                type = SymbolType.CharArray;
+            }
+            constExp.toSymbol(table);
+        } else {
+            if (bType.getType() == TokenType.INTTK) {
+                type = SymbolType.Int;
+            } else {
+                type = SymbolType.Char;
+            }
+        }
+        if (!table.addSymbol(new Symbol(ident.getValue(), type))) {
+            ErrorHandler.addError(ident.getLine(), ErrorType.b);
+        }
+        if (initVal != null) {
+            initVal.toSymbol(table);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(ident.toString());
-        if (constExp != null) {
+        if (lbrack != null) {
             sb.append(lbrack);
             sb.append(constExp);
             sb.append(rbrack);

@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Lexer.TokenType;
 
 public class BType {
     private Token type;
@@ -13,5 +14,9 @@ public class BType {
     @Override
     public String toString() {
         return type.toString();
+    }
+
+    public TokenType getType() {
+        return type.getType();
     }
 }

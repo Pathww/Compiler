@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 import java.util.ArrayList;
 
@@ -15,6 +16,12 @@ public class VarDecl {
         this.varDefs = varDefs;
         this.commas = commas;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        for (VarDef varDef : varDefs) {
+            varDef.toSymbol(table, bType);
+        }
     }
 
     @Override

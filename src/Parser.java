@@ -11,13 +11,11 @@ public class Parser {
     private int size;
     private int pos = -1;
     private Token curToken;
-    private ErrorHandler errorHandler;
     private Token eofTk = new Token(TokenType.EOFTK, "", 0);
 
-    public Parser(ArrayList<Token> tokens, ErrorHandler errorHandler) {
+    public Parser(ArrayList<Token> tokens) {
         this.tokens = tokens;
         this.size = tokens.size();
-        this.errorHandler = errorHandler;
         next();
     }
 
@@ -557,13 +555,13 @@ public class Parser {
             int line = preRead(-1).getLine();
             switch (type) {
                 case SEMICN:
-                    errorHandler.addError(line, ErrorType.i);
+                    ErrorHandler.addError(line, ErrorType.i);
                     return new Token(type, ";", line);
                 case RPARENT:
-                    errorHandler.addError(line, ErrorType.j);
+                    ErrorHandler.addError(line, ErrorType.j);
                     return new Token(type, ")", line);
                 default: // case RBRACK:
-                    errorHandler.addError(line, ErrorType.k);
+                    ErrorHandler.addError(line, ErrorType.k);
                     return new Token(type, "]", line);
             }
         } else {

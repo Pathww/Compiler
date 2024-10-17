@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 import java.util.ArrayList;
 
@@ -17,6 +18,12 @@ public class ConstDecl {
         this.constDefs = constDefs;
         this.commas = commas;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        for (ConstDef c : constDefs) {
+            c.toSymbol(table, bType);
+        }
     }
 
     @Override

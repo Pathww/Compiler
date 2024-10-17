@@ -1,6 +1,8 @@
 package AST;
 
-import Lexer.Token;
+import Lexer.*;
+import Symbol.*;
+import Error.*;
 
 public class LVal {
     private Token ident;
@@ -20,6 +22,15 @@ public class LVal {
         this.rbrack = rbrack;
     }
 
+    public void toSymbol(SymbolTable table) {
+        if (table.getSymbol(ident.getValue()) == null) {
+            ErrorHandler.addError(ident.getLine(), ErrorType.c);
+        }
+        if (exp != null) {
+            exp.toSymbol(table);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -31,5 +42,20 @@ public class LVal {
         }
         sb.append("<LVal>\n");
         return sb.toString();
+    }
+
+    public Token getIdent() {
+        return ident;
+    }
+
+    public int getParaType(SymbolTable table) {
+        Symbol symbol = table.getSymbol(ident.getValue()); // null?
+        if (symbol.getType() == SymbolType.IntArray && lbrack == null) {
+            return 1;
+        } else if (symbol.getType() == SymbolType.CharArray && lbrack == null) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 }

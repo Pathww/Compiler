@@ -1,6 +1,8 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
+import Error.*;
 
 public class StmtReturn implements Stmt {
     private Token returnTk;
@@ -16,6 +18,15 @@ public class StmtReturn implements Stmt {
         this.returnTk = returnTk;
         this.exp = exp;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (exp != null) {
+            if (table.isVoid()) {
+                ErrorHandler.addError(returnTk.getLine(), ErrorType.f);
+            }
+            exp.toSymbol(table);
+        }
     }
 
     @Override

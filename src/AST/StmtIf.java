@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class StmtIf implements Stmt {
     private Token ifTk;
@@ -27,6 +28,14 @@ public class StmtIf implements Stmt {
         this.ifStmt = ifStmt;
         this.elseTk = elseTk;
         this.elseStmt = elseStmt;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        cond.toSymbol(table);
+        ifStmt.toSymbol(table);
+        if (elseStmt != null) {
+            elseStmt.toSymbol(table);
+        }
     }
 
     @Override

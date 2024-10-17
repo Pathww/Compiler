@@ -1,6 +1,8 @@
 package AST;
 
-import Lexer.Token;
+import Lexer.*;
+import Symbol.*;
+import Error.*;
 
 public class FuncDef {
     private FuncType funcType;
@@ -25,6 +27,35 @@ public class FuncDef {
         this.funcFParams = funcFParams;
         this.rparent = rparent;
         this.block = block;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        SymbolType type;
+        SymbolTable nextTable = new SymbolTable(table);
+
+        if (funcType.getType() == TokenType.VOIDTK) {
+            type = SymbolType.VoidFunc;
+            nextTable.setVoid();
+        } else if (funcType.getType() == TokenType.INTTK) {
+            type = SymbolType.IntFunc;
+        } else {
+            type = SymbolType.CharFunc;
+        }
+
+        FuncSymbol funcSymbol = new FuncSymbol(ident.getValue(), type);
+        if (!table.addSymbol(funcSymbol)) {
+            ErrorHandler.addError(ident.getLine(), ErrorType.b);
+        }
+
+        if (funcFParams != null) {
+            funcFParams.toSymbol(nextTable);
+            funcSymbol.setParams(nextTable.getSymbols());
+        }
+        block.toSymbol(nextTable);
+
+        if (funcType.getType() != TokenType.VOIDTK) { //
+            block.checkLastReturn();
+        }
     }
 
     @Override

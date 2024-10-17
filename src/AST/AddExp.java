@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class AddExp {
     private MulExp mulExp = null;
@@ -21,6 +22,13 @@ public class AddExp {
         return mulExp.toLVal();
     }
 
+    public void toSymbol(SymbolTable table) {
+        if (addExp != null) {
+            addExp.toSymbol(table);
+        }
+        mulExp.toSymbol(table);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -34,4 +42,7 @@ public class AddExp {
     }
 
 
+    public int getParaType(SymbolTable table) {
+        return mulExp.getParaType(table);
+    }
 }

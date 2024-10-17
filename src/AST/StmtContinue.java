@@ -1,6 +1,8 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
+import Error.*;
 
 public class StmtContinue implements Stmt {
     private Token continueTk;
@@ -9,6 +11,12 @@ public class StmtContinue implements Stmt {
     public StmtContinue(Token continueTk, Token semicn) {
         this.continueTk = continueTk;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (SymbolTable.loop == 0) {
+            ErrorHandler.addError(continueTk.getLine(), ErrorType.m);
+        }
     }
 
     @Override

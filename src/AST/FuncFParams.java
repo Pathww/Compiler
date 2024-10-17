@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 import java.util.ArrayList;
 
@@ -11,6 +12,12 @@ public class FuncFParams {
     public FuncFParams(ArrayList<FuncFParam> funcFParams, ArrayList<Token> commas) {
         this.funcFParams = funcFParams;
         this.commas = commas;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        for (FuncFParam f : funcFParams) {
+            f.toSymbol(table);
+        }
     }
 
     @Override

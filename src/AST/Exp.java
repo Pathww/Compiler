@@ -1,5 +1,7 @@
 package AST;
 
+import Symbol.SymbolTable;
+
 public class Exp {
     private AddExp addExp;
 
@@ -12,11 +14,19 @@ public class Exp {
         return addExp.toLVal();
     }
 
+    public void toSymbol(SymbolTable table) {
+        addExp.toSymbol(table);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(addExp);
         sb.append("<Exp>\n");
         return sb.toString();
+    }
+
+    public int getParaType(SymbolTable table) {
+        return addExp.getParaType(table);
     }
 }

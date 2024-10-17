@@ -1,6 +1,8 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
+import Error.*;
 
 import java.util.ArrayList;
 
@@ -21,6 +23,23 @@ public class StmtPrintf implements Stmt {
         this.exps = exps;
         this.rparent = rparent;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        String str = stringConst.getValue();
+        int cnt = 0;
+        for (int i = 0; i + 1 < str.length(); i++) {
+            if (str.charAt(i) == '%' && (str.charAt(i + 1) == 'd' || str.charAt(i + 1) == 'c')) {
+                cnt++;
+            }
+        }
+        if (cnt != exps.size()) {
+            ErrorHandler.addError(printfTk.getLine(), ErrorType.l);
+        }
+
+        for (Exp exp : exps) {
+            exp.toSymbol(table);
+        }
     }
 
     @Override

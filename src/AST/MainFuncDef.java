@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.*;
 
 public class MainFuncDef {
     private Token intTk;
@@ -15,6 +16,12 @@ public class MainFuncDef {
         this.lparent = lparent;
         this.rparent = rparent;
         this.block = block;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        SymbolTable nextTable = new SymbolTable(table);
+        block.toSymbol(nextTable);
+        block.checkLastReturn();
     }
 
     @Override

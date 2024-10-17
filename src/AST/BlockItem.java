@@ -1,5 +1,7 @@
 package AST;
 
+import Symbol.SymbolTable;
+
 public class BlockItem {
     private Decl decl = null;
     private Stmt stmt = null;
@@ -12,6 +14,14 @@ public class BlockItem {
         this.stmt = stmt;
     }
 
+    public void toSymbol(SymbolTable table) {
+        if (decl != null) {
+            decl.toSymbol(table);
+        } else {
+            stmt.toSymbol(table);
+        }
+    }
+
     @Override
     public String toString() {
         if (decl != null) {
@@ -19,5 +29,12 @@ public class BlockItem {
         } else {
             return stmt.toString();
         }
+    }
+
+    public boolean isReturn() {
+        if (stmt != null) {
+            return stmt instanceof StmtReturn;
+        }
+        return false;
     }
 }

@@ -13,6 +13,10 @@ public class Error {
         return line;
     }
 
+    public ErrorType getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return line + " " + type + "\n";

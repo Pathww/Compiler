@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 import java.util.ArrayList;
 
@@ -27,6 +28,16 @@ public class InitVal {
 
     public InitVal(Token stringConst) {
         this.stringConst = stringConst;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (exp != null) {
+            exp.toSymbol(table);
+        } else if (lbrace != null) {
+            for (Exp e : exps) {
+                e.toSymbol(table);
+            }
+        }
     }
 
     @Override

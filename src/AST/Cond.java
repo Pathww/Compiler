@@ -1,10 +1,16 @@
 package AST;
 
+import Symbol.SymbolTable;
+
 public class Cond {
     private LOrExp lOrExp;
 
     public Cond(LOrExp lOrExp) {
         this.lOrExp = lOrExp;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        lOrExp.toSymbol(table);
     }
 
     @Override

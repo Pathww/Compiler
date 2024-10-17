@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class StmtExp implements Stmt {
     private Exp exp = null;
@@ -15,6 +16,11 @@ public class StmtExp implements Stmt {
         this.semicn = semicn;
     }
 
+    public void toSymbol(SymbolTable table) {
+        if (exp != null) {
+            exp.toSymbol(table);
+        }
+    }
 
     @Override
     public String toString() {

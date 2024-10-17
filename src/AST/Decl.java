@@ -1,5 +1,7 @@
 package AST;
 
+import Symbol.SymbolTable;
+
 public class Decl {
     private ConstDecl constDecl = null;
     private VarDecl varDecl = null;
@@ -10,6 +12,14 @@ public class Decl {
 
     public Decl(VarDecl varDecl) {
         this.varDecl = varDecl;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (constDecl != null) {
+            constDecl.toSymbol(table);
+        } else {
+            varDecl.toSymbol(table);
+        }
     }
 
     @Override

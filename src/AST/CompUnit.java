@@ -1,5 +1,7 @@
 package AST;
 
+import Symbol.SymbolTable;
+
 import java.util.ArrayList;
 
 public class CompUnit {
@@ -11,6 +13,16 @@ public class CompUnit {
         this.decls = decls;
         this.funcDefs = funcDefs;
         this.mainFuncDef = mainFuncDef;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        for (Decl d : decls) {
+            d.toSymbol(table);
+        }
+        for (FuncDef f : funcDefs) {
+            f.toSymbol(table);
+        }
+        mainFuncDef.toSymbol(table);
     }
 
     @Override

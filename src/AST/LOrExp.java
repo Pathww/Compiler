@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class LOrExp {
     private LAndExp lAndExp = null;
@@ -15,6 +16,13 @@ public class LOrExp {
         this.lOrExp = lOrExp;
         this.or = or;
         this.lAndExp = lAndExp;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (lOrExp != null) {
+            lOrExp.toSymbol(table);
+        }
+        lAndExp.toSymbol(table);
     }
 
     @Override

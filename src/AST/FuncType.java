@@ -1,6 +1,6 @@
 package AST;
 
-import Lexer.Token;
+import Lexer.*;
 
 public class FuncType {
     public Token type;
@@ -15,5 +15,9 @@ public class FuncType {
         sb.append(type.toString());
         sb.append("<FuncType>\n");
         return sb.toString();
+    }
+
+    public TokenType getType() {
+        return type.getType();
     }
 }

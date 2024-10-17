@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class RelExp {
     private AddExp addExp = null;
@@ -16,6 +17,13 @@ public class RelExp {
         this.relExp = relExp;
         this.op = op;
         this.addExp = addExp;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        if (relExp != null) {
+            relExp.toSymbol(table);
+        }
+        addExp.toSymbol(table);
     }
 
     @Override

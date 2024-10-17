@@ -1,6 +1,8 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
+import Error.*;
 
 public class StmtAssign implements Stmt {
     private LVal lVal;
@@ -13,6 +15,14 @@ public class StmtAssign implements Stmt {
         this.assign = assign;
         this.exp = exp;
         this.semicn = semicn;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        lVal.toSymbol(table);
+        exp.toSymbol(table);
+        if (table.isConst(lVal.getIdent().getValue())) {
+            ErrorHandler.addError(lVal.getIdent().getLine(), ErrorType.h);
+        }
     }
 
     @Override

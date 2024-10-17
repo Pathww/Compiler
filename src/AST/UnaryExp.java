@@ -1,6 +1,10 @@
 package AST;
 
 import Lexer.Token;
+import Error.*;
+import Symbol.*;
+
+import java.util.ArrayList;
 
 public class UnaryExp {
     private PrimaryExp primaryExp = null;
@@ -39,6 +43,36 @@ public class UnaryExp {
         return primaryExp.toLVal();
     }
 
+    public void toSymbol(SymbolTable table) {
+        if (primaryExp != null) {
+            primaryExp.toSymbol(table);
+        } else if (unaryExp != null) {
+            unaryExp.toSymbol(table);
+        } else {
+            FuncSymbol funcSymbol = (FuncSymbol) table.getSymbol(ident.getValue());
+            if (funcSymbol == null) {
+                ErrorHandler.addError(ident.getLine(), ErrorType.c);
+                return;
+            }
+            ArrayList<Integer> fparams = funcSymbol.getParaTypes();
+            if (funcRParams != null) {
+                funcRParams.toSymbol(table);
+                ArrayList<Exp> rparams = funcRParams.getExps();
+                if (rparams.size() != fparams.size()) {
+                    ErrorHandler.addError(ident.getLine(), ErrorType.d);
+                    return;
+                }
+                for (int i = 0; i < fparams.size(); i++) {
+                    if (rparams.get(i).getParaType(table) != fparams.get(i)) {
+                        ErrorHandler.addError(ident.getLine(), ErrorType.e);
+                    }
+                }
+            } else if (!fparams.isEmpty()) {
+                ErrorHandler.addError(ident.getLine(), ErrorType.d);
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -58,5 +92,20 @@ public class UnaryExp {
 
         sb.append("<UnaryExp>\n");
         return sb.toString();
+    }
+
+    public int getParaType(SymbolTable table) {
+        if (primaryExp != null) {
+            return primaryExp.getParaType(table);
+        } else if (unaryExp != null) {
+            return 0;
+        } else {
+            Symbol funcSymbol = table.getSymbol(ident.getValue());
+            if (funcSymbol.getType() == SymbolType.VoidFunc) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package AST;
 
 import Lexer.Token;
+import Symbol.SymbolTable;
 
 public class PrimaryExp {
     private Token lparent = null;
@@ -35,6 +36,14 @@ public class PrimaryExp {
         return lVal;
     }
 
+    public void toSymbol(SymbolTable table) {
+        if (lVal != null) {
+            lVal.toSymbol(table);
+        } else if (lparent != null) {
+            exp.toSymbol(table);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -51,6 +60,16 @@ public class PrimaryExp {
         }
         sb.append("<PrimaryExp>\n");
         return sb.toString();
+    }
+
+    public int getParaType(SymbolTable table) {
+        if (exp != null) {
+            return exp.getParaType(table);
+        } else if (lVal != null) {
+            return lVal.getParaType(table);
+        } else {
+            return 0;
+        }
     }
 }
 

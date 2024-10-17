@@ -1,6 +1,8 @@
 package AST;
 
-import Lexer.Token;
+import Lexer.*;
+import Symbol.*;
+import Error.*;
 
 public class FuncFParam {
     private BType bType;
@@ -19,6 +21,26 @@ public class FuncFParam {
         this.ident = ident;
         this.lbrack = lbrack;
         this.rbrack = rbrack;
+    }
+
+    public void toSymbol(SymbolTable table) {
+        SymbolType type;
+        if (lbrack != null) {
+            if (bType.getType() == TokenType.INTTK) {
+                type = SymbolType.IntArray;
+            } else {
+                type = SymbolType.CharArray;
+            }
+        } else {
+            if (bType.getType() == TokenType.INTTK) {
+                type = SymbolType.Int;
+            } else {
+                type = SymbolType.Char;
+            }
+        }
+        if (!table.addSymbol(new Symbol(ident.getValue(), type))) {
+            ErrorHandler.addError(ident.getLine(), ErrorType.b);
+        }
     }
 
     @Override
