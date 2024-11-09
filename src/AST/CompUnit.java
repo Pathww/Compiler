@@ -25,6 +25,16 @@ public class CompUnit {
         mainFuncDef.toSymbol(table);
     }
 
+    public void buildIR() {
+        for (Decl d : decls) {
+            d.buildIR();
+        }
+        for (FuncDef f : funcDefs) {
+            f.buildIR();
+        }
+        mainFuncDef.buildIR();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

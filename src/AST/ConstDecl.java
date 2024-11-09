@@ -26,6 +26,12 @@ public class ConstDecl {
         }
     }
 
+    public void buildIR() {
+        for (ConstDef c : constDefs) {
+            c.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -1,5 +1,8 @@
 package AST;
 
+import LLVM.ConstInteger;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -40,6 +43,72 @@ public class InitVal {
         }
     }
 
+    public ArrayList<Value> buildIR() {
+        ArrayList<Value> values = new ArrayList<>();
+        if (exp != null) {
+            values.add(exp.buildIR());
+        } else if (exps != null) {
+            for (Exp e : exps) {
+                values.add(e.buildIR());
+            }
+        } else {
+            String str = stringConst.getValue().substring(1, stringConst.getValue().length() - 1);
+            for (int i = 0; i < str.length(); i++) {
+                char ch = str.charAt(i);
+                if (ch == '\\') {
+                    i++;
+                    ch = str.charAt(i);
+                    switch (ch) {
+                        case 'a':
+                            ch = 7;
+                            break;
+                        case 'b':
+                            ch = '\b';
+                            break;
+                        case 't':
+                            ch = '\t';
+                            break;
+                        case 'n':
+                            ch = '\n';
+                            break;
+                        case 'v':
+                            ch = 11;
+                            break;
+                        case 'f':
+                            ch = '\f';
+                            break;
+                        case '\"':
+                            ch = '\"';
+                            break;
+                        case '\'':
+                            ch = '\'';
+                            break;
+                        case '\\':
+                            ch = '\\';
+                            break;
+                        case '0':
+                            ch = '\0';
+                            break;
+                    }
+                }
+                values.add(new ConstInteger(ch, IntegerType.I8));
+            }
+        }
+        return values;
+    }
+
+    public String getStringConst() {
+        if (stringConst != null) {
+            return stringConst.getValue().substring(1, stringConst.getValue().length() - 1);
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Exp e : exps) {
+            char ch = (char) e.calVal();
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -61,5 +130,59 @@ public class InitVal {
 
         sb.append("<InitVal>\n");
         return sb.toString();
+    }
+
+    public ArrayList<Integer> calVal() {
+        ArrayList<Integer> list = new ArrayList<>();
+        if (exp != null) {
+            list.add(exp.calVal());
+        } else if (exps != null) {
+            for (Exp e : exps) {
+                list.add(e.calVal());
+            }
+        } else {
+            String str = stringConst.getValue().substring(1, stringConst.getValue().length() - 1);
+            for (int i = 0; i < str.length(); i++) {
+                char ch = str.charAt(i);
+                if (ch == '\\') {
+                    i++;
+                    ch = str.charAt(i);
+                    switch (ch) {
+                        case 'a':
+                            ch = 7;
+                            break;
+                        case 'b':
+                            ch = '\b';
+                            break;
+                        case 't':
+                            ch = '\t';
+                            break;
+                        case 'n':
+                            ch = '\n';
+                            break;
+                        case 'v':
+                            ch = 11;
+                            break;
+                        case 'f':
+                            ch = '\f';
+                            break;
+                        case '\"':
+                            ch = '\"';
+                            break;
+                        case '\'':
+                            ch = '\'';
+                            break;
+                        case '\\':
+                            ch = '\\';
+                            break;
+                        case '0':
+                            ch = '\0';
+                            break;
+                    }
+                }
+                list.add((int) ch);
+            }
+        }
+        return list;
     }
 }

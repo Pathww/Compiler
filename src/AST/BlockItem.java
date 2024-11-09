@@ -22,6 +22,14 @@ public class BlockItem {
         }
     }
 
+    public void buildIR() {
+        if (decl != null) {
+            decl.buildIR();
+        } else {
+            stmt.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         if (decl != null) {

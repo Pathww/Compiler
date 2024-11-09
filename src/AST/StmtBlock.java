@@ -14,6 +14,10 @@ public class StmtBlock implements Stmt {
         block.toSymbol(nextTable);
     }
 
+    public void buildIR() {
+        block.buildIR();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

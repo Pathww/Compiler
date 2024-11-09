@@ -21,4 +21,8 @@ public class ConstExp {
         sb.append("<ConstExp>\n");
         return sb.toString();
     }
+
+    public int calVal() {
+        return addExp.calVal();
+    }
 }

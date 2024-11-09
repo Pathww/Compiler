@@ -1,5 +1,11 @@
 package AST;
 
+import LLVM.BasicBlock;
+import LLVM.ConstInteger;
+import LLVM.IRBuilder;
+import LLVM.Instr.InstrType;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -23,6 +29,21 @@ public class LAndExp {
             lAndExp.toSymbol(table);
         }
         eqExp.toSymbol(table);
+    }
+
+    public void buildIR(BasicBlock trueBlock, BasicBlock falseBlock) {
+        if (lAndExp != null) {
+            BasicBlock nextBlock = new BasicBlock();
+            lAndExp.buildIR(nextBlock, falseBlock);
+            IRBuilder.addBasicBlock(nextBlock);
+        }
+        Value value = eqExp.buildIR();
+        if (value.getType() != IntegerType.I1) {
+            Value cmp = IRBuilder.addCmpInst(InstrType.NE, value, new ConstInteger(0, value.getType()));
+            IRBuilder.addBranchInst(cmp, trueBlock, falseBlock);
+        } else {
+            IRBuilder.addBranchInst(value, trueBlock, falseBlock);
+        }
     }
 
     @Override

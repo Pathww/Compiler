@@ -1,5 +1,7 @@
 package AST;
 
+import LLVM.BasicBlock;
+import LLVM.IRBuilder;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -35,6 +37,25 @@ public class StmtIf implements Stmt {
         ifStmt.toSymbol(table);
         if (elseStmt != null) {
             elseStmt.toSymbol(table);
+        }
+    }
+
+    public void buildIR() {
+        BasicBlock trueBlock = new BasicBlock();
+        BasicBlock falseBlock = new BasicBlock();
+        cond.buildIR(trueBlock, falseBlock);
+        IRBuilder.addBasicBlock(trueBlock);
+        ifStmt.buildIR();
+        if (elseStmt != null) {
+            BasicBlock lastBlock = new BasicBlock();
+            IRBuilder.addBranchInst(lastBlock);
+            IRBuilder.addBasicBlock(falseBlock);
+            elseStmt.buildIR();
+            IRBuilder.addBranchInst(lastBlock);
+            IRBuilder.addBasicBlock(lastBlock);
+        } else {
+            IRBuilder.addBranchInst(falseBlock); // TODO: 可以删掉？？？
+            IRBuilder.addBasicBlock(falseBlock);
         }
     }
 

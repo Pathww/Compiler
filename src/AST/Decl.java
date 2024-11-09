@@ -22,6 +22,14 @@ public class Decl {
         }
     }
 
+    public void buildIR() {
+        if (constDecl != null) {
+            constDecl.buildIR();
+        } else {
+            varDecl.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

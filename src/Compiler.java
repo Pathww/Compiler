@@ -2,9 +2,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import AST.CompUnit;
+import AST.*;
+import LLVM.*;
 import Lexer.*;
 import Error.*;
+import Parser.*;
 import Symbol.*;
 
 public class Compiler {
@@ -26,13 +28,32 @@ public class Compiler {
         SymbolTable table = new SymbolTable(null);
         compUnit.toSymbol(table);
 
-        FileWriter fw = new FileWriter("symbol.txt");
-        fw.write(table.toString());
-        fw.close();
-
         ErrorHandler errorHandler = new ErrorHandler();
-        FileWriter error = new FileWriter("error.txt");
-        error.write(errorHandler.toString());
-        error.close();
+        if (!errorHandler.isEmpty()) {
+            FileWriter error = new FileWriter("error.txt");
+            error.write(errorHandler.toString());
+            error.close();
+            return;
+        }
+
+//        try {
+            compUnit.buildIR();
+//        } catch (Exception e) {
+//            StackTraceElement stackTraceElement = e.getStackTrace()[0];
+//            System.out.println(stackTraceElement.getClassName());
+//            if (stackTraceElement.getClassName().equals("Symbol.Symbol")) {
+//
+//            } else {
+//                e.printStackTrace();
+//            }
+//        }
+
+        IRBuilder.module.allocName();
+        FileWriter fw = new FileWriter("llvm_ir.txt");
+        fw.write(IRBuilder.module.toString());
+//        fw.write("define i32 @main() {\n" +
+//                "\tret i32 0\n"
+//                "}");
+        fw.close();
     }
 }

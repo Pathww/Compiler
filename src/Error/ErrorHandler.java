@@ -19,6 +19,10 @@ public class ErrorHandler {
         lines.add(line);
     }
 
+    public boolean isEmpty() {
+        return errors.isEmpty();
+    }
+
     @Override
     public String toString() {
         errors.sort(cmp);

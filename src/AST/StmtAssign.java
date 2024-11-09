@@ -1,5 +1,10 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Instr.InstrType;
+import LLVM.Type.IntegerType;
+import LLVM.Type.PointerType;
+import LLVM.Value;
 import Lexer.Token;
 import Symbol.SymbolTable;
 import Error.*;
@@ -24,6 +29,20 @@ public class StmtAssign implements Stmt {
             ErrorHandler.addError(lVal.getIdent().getLine(), ErrorType.h);
         }
     }
+
+    public void buildIR() {
+        Value lValue = lVal.buildIR(); // TODO:两者的顺序？？？
+        Value expValue = exp.buildIR();
+        if (expValue.getType() != ((PointerType) lValue.getType()).getRefType()) {
+            if (expValue.getType() == IntegerType.I8) {
+                expValue = IRBuilder.addConvertInst(InstrType.ZEXT, expValue, IntegerType.I32);
+            } else {
+                expValue = IRBuilder.addConvertInst(InstrType.TRUNC, expValue, IntegerType.I8);
+            }
+        }
+        IRBuilder.addStoreInst(expValue, lValue);
+    }
+
 
     @Override
     public String toString() {

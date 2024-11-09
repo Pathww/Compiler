@@ -1,5 +1,7 @@
 package AST;
 
+import LLVM.BasicBlock;
+import LLVM.IRBuilder;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -51,6 +53,55 @@ public class StmtFor implements Stmt {
         SymbolTable.loop++;
         stmt.toSymbol(table);
         SymbolTable.loop--;
+    }
+
+    public void buildIR() {
+        BasicBlock condBlock = new BasicBlock();
+        BasicBlock stmtBlock = new BasicBlock();
+        BasicBlock forBlock = new BasicBlock();
+        BasicBlock lastBlock = new BasicBlock();
+        if (forStmt1 != null) {
+            forStmt1.buildIR();
+        }
+
+        if (cond != null) {
+            IRBuilder.addBranchInst(condBlock);
+            IRBuilder.addBasicBlock(condBlock);
+            cond.buildIR(stmtBlock, lastBlock);
+        } else {
+            IRBuilder.addBranchInst(stmtBlock);
+        }
+//        else {
+//            IRBuilder.addBranchInst(stmtBlock);
+//            IRBuilder.addBasicBlock(stmtBlock);
+//        }
+
+        IRBuilder.addBasicBlock(stmtBlock);
+
+        if (forStmt2 != null) {
+            IRBuilder.enterLoop(forBlock, lastBlock);
+        } else if (cond != null) {
+            IRBuilder.enterLoop(condBlock, lastBlock);
+        } else {
+            IRBuilder.enterLoop(stmtBlock, lastBlock);
+        }
+
+        stmt.buildIR();
+        IRBuilder.leaveLoop();
+
+        if (forStmt2 != null) {
+            IRBuilder.addBranchInst(forBlock);
+            IRBuilder.addBasicBlock(forBlock);
+            forStmt2.buildIR();
+        }
+
+        if (cond != null) {
+            IRBuilder.addBranchInst(condBlock);
+        } else {
+            IRBuilder.addBranchInst(stmtBlock);
+        }
+
+        IRBuilder.addBasicBlock(lastBlock);
     }
 
     @Override

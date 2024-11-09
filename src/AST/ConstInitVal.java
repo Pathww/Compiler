@@ -62,5 +62,71 @@ public class ConstInitVal {
         sb.append("<ConstInitVal>\n");
         return sb.toString();
     }
+
+    public String getStringConst() {
+        if (stringConst != null) {
+            return stringConst.getValue().substring(1, stringConst.getValue().length() - 1);
+        }
+        StringBuilder sb = new StringBuilder();
+        for (ConstExp c : constExps) {
+            char ch = (char) c.calVal();
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
+    public ArrayList<Integer> calVal() {
+        ArrayList<Integer> list = new ArrayList<>();
+        if (constExp != null) {
+            list.add(constExp.calVal());
+        } else if (constExps != null) {
+            for (ConstExp e : constExps) {
+                list.add(e.calVal());
+            }
+        } else {
+            String str = stringConst.getValue().substring(1, stringConst.getValue().length() - 1);
+            for (int i = 0; i < str.length(); i++) {
+                char ch = str.charAt(i);
+                if (ch == '\\') {
+                    i++;
+                    ch = str.charAt(i);
+                    switch (ch) {
+                        case 'a':
+                            ch = 7;
+                            break;
+                        case 'b':
+                            ch = '\b';
+                            break;
+                        case 't':
+                            ch = '\t';
+                            break;
+                        case 'n':
+                            ch = '\n';
+                            break;
+                        case 'v':
+                            ch = 11;
+                            break;
+                        case 'f':
+                            ch = '\f';
+                            break;
+                        case '\"':
+                            ch = '\"';
+                            break;
+                        case '\'':
+                            ch = '\'';
+                            break;
+                        case '\\':
+                            ch = '\\';
+                            break;
+                        case '0':
+                            ch = '\0';
+                            break;
+                    }
+                }
+                list.add((int) ch);
+            }
+        }
+        return list;
+    }
 }
 

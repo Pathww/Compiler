@@ -1,5 +1,6 @@
 package AST;
 
+import LLVM.Value;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -18,6 +19,14 @@ public class FuncRParams {
         for (Exp exp : exps) {
             exp.toSymbol(table);
         }
+    }
+
+    public ArrayList<Value> buildIR() {
+        ArrayList<Value> values = new ArrayList<>();
+        for (Exp exp : exps) {
+            values.add(exp.buildIR());
+        }
+        return values;
     }
 
     @Override

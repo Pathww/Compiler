@@ -22,6 +22,12 @@ public class StmtExp implements Stmt {
         }
     }
 
+    public void buildIR() {
+        if (exp != null) {
+            exp.buildIR(); // TODO:死表达式检查删除！
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

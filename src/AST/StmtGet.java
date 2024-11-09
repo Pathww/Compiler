@@ -1,8 +1,15 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Instr.InstrType;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.Token;
+import Lexer.TokenType;
 import Symbol.SymbolTable;
 import Error.*;
+
+import java.util.ArrayList;
 
 public class StmtGet implements Stmt {
     private LVal lVal;
@@ -26,6 +33,18 @@ public class StmtGet implements Stmt {
         if (table.isConst(lVal.getIdent().getValue())) {
             ErrorHandler.addError(lVal.getIdent().getLine(), ErrorType.h);
         }
+    }
+
+    public void buildIR() {
+        Value lValue = lVal.buildIR();
+        Value callVal;
+        if (getTk.getType() == TokenType.GETINTTK) {
+            callVal = IRBuilder.addCallInst(IRBuilder.getint, new ArrayList<>());
+        } else {
+            callVal = IRBuilder.addCallInst(IRBuilder.getchar, new ArrayList<>());
+            callVal = IRBuilder.addConvertInst(InstrType.TRUNC, callVal, IntegerType.I8);
+        }
+        IRBuilder.addStoreInst(callVal, lValue);
     }
 
     @Override

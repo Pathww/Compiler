@@ -28,6 +28,12 @@ public class Block {
         }
     }
 
+    public void buildIR() {
+        for (BlockItem blockItem : blockItems) {
+            blockItem.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -40,13 +46,16 @@ public class Block {
         return sb.toString();
     }
 
-    public void checkLastReturn() {
+    public boolean checkLastReturn() {
         if (blockItems.isEmpty()) {
             ErrorHandler.addError(rbrace.getLine(), ErrorType.g);
+            return false;
         } else {
             if (!blockItems.get(blockItems.size() - 1).isReturn()) {
                 ErrorHandler.addError(rbrace.getLine(), ErrorType.g);
+                return false;
             }
         }
+        return true;
     }
 }

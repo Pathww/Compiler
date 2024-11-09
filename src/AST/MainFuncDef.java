@@ -1,5 +1,7 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Type.IntegerType;
 import Lexer.Token;
 import Symbol.*;
 
@@ -22,6 +24,11 @@ public class MainFuncDef {
         SymbolTable nextTable = new SymbolTable(table);
         block.toSymbol(nextTable);
         block.checkLastReturn();
+    }
+
+    public void buildIR() {
+        IRBuilder.addFunction(mainTk.getValue(), IntegerType.I32);
+        block.buildIR();
     }
 
     @Override

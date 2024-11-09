@@ -6,4 +6,6 @@ public interface Stmt {
     String toString();
 
     void toSymbol(SymbolTable table);
+
+    void buildIR();
 }

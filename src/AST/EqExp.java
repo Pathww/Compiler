@@ -1,6 +1,11 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Instr.InstrType;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.Token;
+import Lexer.TokenType;
 import Symbol.SymbolTable;
 
 public class EqExp {
@@ -23,6 +28,25 @@ public class EqExp {
             eqExp.toSymbol(table);
         }
         relExp.toSymbol(table);
+    }
+
+    public Value buildIR() {
+        if (eqExp != null) {
+            Value left = eqExp.buildIR();
+            Value right = relExp.buildIR();
+            if (left.getType() != IntegerType.I32) {
+                left = IRBuilder.addConvertInst(InstrType.ZEXT, left, IntegerType.I32);
+            }
+            if (right.getType() != IntegerType.I32) {
+                right = IRBuilder.addConvertInst(InstrType.ZEXT, right, IntegerType.I32);
+            }
+            if (op.getType() == TokenType.EQL) {
+                return IRBuilder.addCmpInst(InstrType.EQ, left, right);
+            } else {
+                return IRBuilder.addCmpInst(InstrType.NE, left, right);
+            }
+        }
+        return relExp.buildIR();
     }
 
     @Override

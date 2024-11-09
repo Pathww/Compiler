@@ -1,5 +1,6 @@
 package AST;
 
+import LLVM.BasicBlock;
 import Symbol.SymbolTable;
 
 public class Cond {
@@ -11,6 +12,10 @@ public class Cond {
 
     public void toSymbol(SymbolTable table) {
         lOrExp.toSymbol(table);
+    }
+
+    public void buildIR(BasicBlock trueBlock, BasicBlock falseBlock) {
+        lOrExp.buildIR(trueBlock, falseBlock);
     }
 
     @Override

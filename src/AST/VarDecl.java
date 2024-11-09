@@ -24,6 +24,12 @@ public class VarDecl {
         }
     }
 
+    public void buildIR() {
+        for (VarDef varDef : varDefs) {
+            varDef.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

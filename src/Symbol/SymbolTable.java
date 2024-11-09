@@ -15,6 +15,8 @@ public class SymbolTable {
 
     private boolean isVoid = false;
 
+    private boolean isGlobal = true;
+
     public static int loop = 0;
 
     public SymbolTable(SymbolTable preTable) {
@@ -23,6 +25,7 @@ public class SymbolTable {
         if (preTable != null) {
             preTable.addTable(this);
             this.isVoid = preTable.isVoid();
+            this.isGlobal = false;
         }
         this.preTable = preTable;
     }
@@ -71,6 +74,10 @@ public class SymbolTable {
         Symbol s = getSymbol(ident);
         return s != null &&
                 (s.getType() == SymbolType.ConstCharArray || s.getType() == SymbolType.ConstIntArray || s.getType() == SymbolType.ConstChar || s.getType() == SymbolType.ConstInt);
+    }
+
+    public boolean isGlobal() {
+        return isGlobal;
     }
 
     public ArrayList<Symbol> getSymbols() {

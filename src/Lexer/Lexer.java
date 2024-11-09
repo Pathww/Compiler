@@ -38,7 +38,7 @@ public class Lexer {
                 while (isDigit(ch)) {
                     sb.append(ch);
                     pos++;
-                    if (pos >= input.length()) {
+                    if (pos >= length) {
                         break;
                     }
                     ch = input.charAt(pos);
@@ -58,7 +58,12 @@ public class Lexer {
                     if (ch == '\"') {
                         break;
                     }
-                    if (pos >= input.length()) {
+                    if (ch == '\\') {
+                        ch = input.charAt(pos);
+                        sb.append(ch);
+                        pos++;
+                    }
+                    if (pos >= length) {
                         break;
                     }
                     ch = input.charAt(pos);

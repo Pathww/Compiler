@@ -1,5 +1,9 @@
 package AST;
 
+import LLVM.ConstInteger;
+import LLVM.IRBuilder;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.*;
 import Symbol.*;
 import Error.*;
@@ -10,6 +14,8 @@ public class LVal {
     private Token lbrack = null;
     private Exp exp = null;
     private Token rbrack = null;
+
+    private VarSymbol symbol;
 
     public LVal(Token ident) {
         this.ident = ident;
@@ -23,12 +29,37 @@ public class LVal {
     }
 
     public void toSymbol(SymbolTable table) {
-        if (table.getSymbol(ident.getValue()) == null) {
+        Symbol res = table.getSymbol(ident.getValue());
+        if (res == null) {
             ErrorHandler.addError(ident.getLine(), ErrorType.c);
+        } else {
+            symbol = (VarSymbol) res;
         }
         if (exp != null) {
             exp.toSymbol(table);
         }
+    }
+
+    private boolean isArrayPara = false;
+
+    public Value buildIR() { // pointer
+        if (symbol.getDim() == 0) {
+            return symbol.getValue();
+        } else if (lbrack != null) { // 数组元素
+            Value val = symbol.getValue();
+//            if (((PointerType) symbol.getValue().getType()).getRefType() instanceof PointerType) {
+//                val = IRBuilder.addLoadInst(symbol.getValue());
+//            }
+            Value index = exp.buildIR();
+            return IRBuilder.addGetElementPtrInst(val, index);
+        } else { // 数组指针
+            isArrayPara = true;
+            return IRBuilder.addGetElementPtrInst(symbol.getValue(), new ConstInteger(0, IntegerType.I32));
+        }
+    }
+
+    public boolean isArrayPara() {
+        return isArrayPara;
     }
 
     @Override
@@ -49,13 +80,21 @@ public class LVal {
     }
 
     public int getParaType(SymbolTable table) {
-        Symbol symbol = table.getSymbol(ident.getValue()); // null?
         if (symbol.getType() == SymbolType.IntArray && lbrack == null) {
             return 1;
         } else if (symbol.getType() == SymbolType.CharArray && lbrack == null) {
             return 2;
         } else {
             return 0;
+        }
+    }
+
+    public int calVal() {
+        if (symbol.isInt() || symbol.isChar()) { // TODO: 勿忘const！！！
+            return symbol.getInitVal(0);
+        } else {
+            int index = exp.calVal();
+            return symbol.getInitVal(index);
         }
     }
 }

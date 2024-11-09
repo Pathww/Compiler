@@ -20,6 +20,12 @@ public class FuncFParams {
         }
     }
 
+    public void buildIR() {
+        for (FuncFParam f : funcFParams) {
+            f.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

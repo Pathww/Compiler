@@ -1,7 +1,14 @@
 package AST;
 
+import LLVM.ConstInteger;
+import LLVM.Function;
+import LLVM.IRBuilder;
+import LLVM.Instr.InstrType;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.Token;
 import Error.*;
+import Lexer.TokenType;
 import Symbol.*;
 
 import java.util.ArrayList;
@@ -16,6 +23,8 @@ public class UnaryExp {
 
     private UnaryOp unaryOp = null;
     private UnaryExp unaryExp = null;
+
+    private FuncSymbol funcSymbol;
 
     public UnaryExp(PrimaryExp primaryExp) {
         this.primaryExp = primaryExp;
@@ -49,7 +58,7 @@ public class UnaryExp {
         } else if (unaryExp != null) {
             unaryExp.toSymbol(table);
         } else {
-            FuncSymbol funcSymbol = (FuncSymbol) table.getSymbol(ident.getValue());
+            funcSymbol = (FuncSymbol) table.getSymbol(ident.getValue());
             if (funcSymbol == null) {
                 ErrorHandler.addError(ident.getLine(), ErrorType.c);
                 return;
@@ -69,6 +78,56 @@ public class UnaryExp {
                 }
             } else if (!fparams.isEmpty()) {
                 ErrorHandler.addError(ident.getLine(), ErrorType.d);
+            }
+        }
+    }
+
+    public Value buildIR() {
+        if (primaryExp != null) {
+            return primaryExp.buildIR();
+        } else if (unaryExp != null) {
+            Value value = unaryExp.buildIR();
+            if (value.getType() != IntegerType.I32) { // SEXT???
+                value = IRBuilder.addConvertInst(InstrType.ZEXT, value, IntegerType.I32);
+            }
+            if (unaryOp.getType() == TokenType.PLUS) {
+                return value;
+            } else if (unaryOp.getType() == TokenType.MINU) {
+                return IRBuilder.addBinaryInst(InstrType.SUB, new ConstInteger(0, IntegerType.I32), value);
+            } else {
+                Value cmp = IRBuilder.addCmpInst(InstrType.EQ, new ConstInteger(0, IntegerType.I32), value);
+                return IRBuilder.addConvertInst(InstrType.ZEXT, cmp, IntegerType.I32);
+            }
+        } else {
+            Function function = (Function) funcSymbol.getValue();
+            if (funcRParams != null) {
+                ArrayList<Value> values = funcRParams.buildIR();
+                ArrayList<Value> params = function.getParams();
+                for (int i = 0; i < values.size(); i++) {
+                    Value value = values.get(i);
+                    Value param = params.get(i);
+                    if (value.getType() != param.getType() && param.getType() instanceof IntegerType) {
+                        if (value.getType() == IntegerType.I32) {
+                            if (value instanceof ConstInteger) {
+                                value.setType(IntegerType.I8);
+                            }else {
+                                value = IRBuilder.addConvertInst(InstrType.TRUNC, value, IntegerType.I8);
+                                values.set(i, value);
+                            }
+                        }else {
+                            if (value instanceof ConstInteger) {
+                                value.setType(IntegerType.I32);
+                            }else {
+                                value = IRBuilder.addConvertInst(InstrType.ZEXT, value, IntegerType.I32);
+                                values.set(i, value);
+                            }
+                        }
+                    }
+                }
+                return IRBuilder.addCallInst(function, values);
+            } else {
+                return IRBuilder.addCallInst(function, new ArrayList<>());
+                // zext???
             }
         }
     }
@@ -100,11 +159,23 @@ public class UnaryExp {
         } else if (unaryExp != null) {
             return 0;
         } else {
-            Symbol funcSymbol = table.getSymbol(ident.getValue());
+            funcSymbol = (FuncSymbol) table.getSymbol(ident.getValue());
             if (funcSymbol.getType() == SymbolType.VoidFunc) {
                 return -1;
             } else {
                 return 0;
+            }
+        }
+    }
+
+    public int calVal() {
+        if (primaryExp != null) {
+            return primaryExp.calVal();
+        } else { // 常量计算无函数调用
+            if (unaryOp.getType() == TokenType.PLUS) {
+                return unaryExp.calVal();
+            } else {
+                return -unaryExp.calVal();
             }
         }
     }

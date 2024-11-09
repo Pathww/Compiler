@@ -1,5 +1,7 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Value;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -44,6 +46,22 @@ public class PrimaryExp {
         }
     }
 
+    public Value buildIR() {
+        if (lVal != null) {
+            Value value = lVal.buildIR();
+            if (lVal.isArrayPara()) {
+                return value;
+            }
+            return IRBuilder.addLoadInst(value); // LOAD 勿忘
+        } else if (number != null) {
+            return number.buildIR();
+        } else if (character != null) {
+            return character.buildIR();
+        } else {
+            return exp.buildIR();
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -69,6 +87,18 @@ public class PrimaryExp {
             return lVal.getParaType(table);
         } else {
             return 0;
+        }
+    }
+
+    public int calVal() {
+        if (exp != null) {
+            return exp.calVal();
+        } else if (lVal != null) {
+            return lVal.calVal();
+        } else if (number != null) {
+            return number.calVal();
+        } else {
+            return character.calVal();
         }
     }
 }

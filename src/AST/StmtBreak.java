@@ -1,5 +1,7 @@
 package AST;
 
+import LLVM.BasicBlock;
+import LLVM.IRBuilder;
 import Lexer.Token;
 import Symbol.SymbolTable;
 import Error.*;
@@ -17,6 +19,11 @@ public class StmtBreak implements Stmt {
         if (SymbolTable.loop == 0) {
             ErrorHandler.addError(breakTk.getLine(), ErrorType.m);
         }
+    }
+
+    public void buildIR() {
+        BasicBlock basicBlock = IRBuilder.getLastBlock();
+        IRBuilder.addBranchInst(basicBlock);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package AST;
 
+import LLVM.BasicBlock;
+import LLVM.IRBuilder;
 import Lexer.Token;
 import Symbol.SymbolTable;
 
@@ -23,6 +25,15 @@ public class LOrExp {
             lOrExp.toSymbol(table);
         }
         lAndExp.toSymbol(table);
+    }
+
+    public void buildIR(BasicBlock trueBlock, BasicBlock falseBlock) {
+        if (lOrExp != null) {
+            BasicBlock nextBlock = new BasicBlock();
+            lOrExp.buildIR(trueBlock, nextBlock);
+            IRBuilder.addBasicBlock(nextBlock);
+        }
+        lAndExp.buildIR(trueBlock, falseBlock);
     }
 
     @Override

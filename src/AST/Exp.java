@@ -1,5 +1,6 @@
 package AST;
 
+import LLVM.Value;
 import Symbol.SymbolTable;
 
 public class Exp {
@@ -18,6 +19,10 @@ public class Exp {
         addExp.toSymbol(table);
     }
 
+    public Value buildIR() {
+        return addExp.buildIR();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -28,5 +33,9 @@ public class Exp {
 
     public int getParaType(SymbolTable table) {
         return addExp.getParaType(table);
+    }
+
+    public int calVal() {
+        return addExp.calVal();
     }
 }

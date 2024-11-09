@@ -1,5 +1,9 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Instr.InstrType;
+import LLVM.Type.IntegerType;
+import LLVM.Value;
 import Lexer.Token;
 import Symbol.SymbolTable;
 import Error.*;
@@ -26,6 +30,22 @@ public class StmtReturn implements Stmt {
                 ErrorHandler.addError(returnTk.getLine(), ErrorType.f);
             }
             exp.toSymbol(table);
+        }
+    }
+
+    public void buildIR() {
+        if (exp != null) {
+            Value value = exp.buildIR();
+            if (IRBuilder.getCurFunction().getType() != value.getType()) {
+                if (IRBuilder.getCurFunction().getType() == IntegerType.I32) {
+                    value = IRBuilder.addConvertInst(InstrType.ZEXT, value, IntegerType.I32);
+                } else {
+                    value = IRBuilder.addConvertInst(InstrType.TRUNC, value, IntegerType.I8);
+                }
+            }
+            IRBuilder.addReturnInst(value);
+        } else {
+            IRBuilder.addReturnInst();
         }
     }
 

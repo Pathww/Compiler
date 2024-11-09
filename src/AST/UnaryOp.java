@@ -1,12 +1,17 @@
 package AST;
 
 import Lexer.Token;
+import Lexer.TokenType;
 
 public class UnaryOp {
     private Token op;
 
     public UnaryOp(Token op) {
         this.op = op;
+    }
+
+    public TokenType getType() {
+        return op.getType();
     }
 
     @Override

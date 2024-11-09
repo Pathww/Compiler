@@ -1,5 +1,10 @@
 package AST;
 
+import LLVM.IRBuilder;
+import LLVM.Type.IRType;
+import LLVM.Type.IntegerType;
+import LLVM.Type.PointerType;
+import LLVM.Value;
 import Lexer.*;
 import Symbol.*;
 import Error.*;
@@ -10,6 +15,7 @@ public class FuncFParam {
 
     private Token lbrack = null;
     private Token rbrack = null;
+    private VarSymbol symbol;
 
     public FuncFParam(BType bType, Token ident) {
         this.bType = bType;
@@ -38,9 +44,28 @@ public class FuncFParam {
                 type = SymbolType.Char;
             }
         }
-        if (!table.addSymbol(new Symbol(ident.getValue(), type))) {
+        symbol = new VarSymbol(ident.getValue(), type);
+        if (!table.addSymbol(symbol)) {
             ErrorHandler.addError(ident.getLine(), ErrorType.b);
         }
+    }
+
+    public void buildIR() {
+        IRType type;
+        type = (symbol.getType() == SymbolType.Int || symbol.getType() == SymbolType.IntArray) ? IntegerType.I32 : IntegerType.I8;
+        if (lbrack != null) {
+            type = new PointerType(type);
+        }
+        Value param = IRBuilder.addParam(type);
+//        symbol.setValue(param);
+        Value alloc = IRBuilder.addAllocaInst(type);
+        IRBuilder.addStoreInst(param, alloc);
+
+        if (lbrack != null) {
+            alloc = IRBuilder.addLoadInst(alloc); // todo 优化时解决掉！
+        }
+        symbol.setValue(alloc);
+        // 数组指针不用alloc+store'？？？
     }
 
     @Override
