@@ -80,9 +80,9 @@ public class LVal {
     }
 
     public int getParaType(SymbolTable table) {
-        if (symbol.getType() == SymbolType.IntArray && lbrack == null) {
+        if (symbol.isIntArray() && lbrack == null) {
             return 1;
-        } else if (symbol.getType() == SymbolType.CharArray && lbrack == null) {
+        } else if (symbol.isCharArray() && lbrack == null) {
             return 2;
         } else {
             return 0;
