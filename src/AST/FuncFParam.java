@@ -61,9 +61,9 @@ public class FuncFParam {
         Value alloc = IRBuilder.addAllocaInst(type);
         IRBuilder.addStoreInst(param, alloc);
 
-        if (lbrack != null) {
-            alloc = IRBuilder.addLoadInst(alloc); // todo 优化时解决掉！
-        }
+//        if (lbrack != null) {
+//            alloc = IRBuilder.addLoadInst(alloc); // todo 优化时解决掉！move???
+//        }
         symbol.setValue(alloc);
         // 数组指针不用alloc+store'？？？
     }

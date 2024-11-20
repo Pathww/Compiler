@@ -2,6 +2,7 @@ package LLVM;
 
 import LLVM.Instr.Instruction;
 import LLVM.Type.IRType;
+import MIPS.MipsBuilder;
 
 import java.util.ArrayList;
 
@@ -54,6 +55,21 @@ public class Function extends Value {
         for (BasicBlock b : blocks) {
             b.setName();
             b.allocName();
+        }
+    }
+
+    public void buildMips() {
+        MipsBuilder.addFunction(getName().substring(1));
+        MipsBuilder.addParams(params);
+
+        if (getName().equals("@main")) {
+            blocks.get(blocks.size() - 1).removeLastReturn();
+        }
+        for (BasicBlock b : blocks) {
+            b.buildMips();
+        }
+        if (getName().equals("@main")) {
+            MipsBuilder.addSyscallInst(10);
         }
     }
 }

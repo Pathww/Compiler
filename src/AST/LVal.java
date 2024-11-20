@@ -3,6 +3,7 @@ package AST;
 import LLVM.ConstInteger;
 import LLVM.IRBuilder;
 import LLVM.Type.IntegerType;
+import LLVM.Type.PointerType;
 import LLVM.Value;
 import Lexer.*;
 import Symbol.*;
@@ -45,16 +46,22 @@ public class LVal {
     public Value buildIR() { // pointer
         if (symbol.getDim() == 0) {
             return symbol.getValue();
-        } else if (lbrack != null) { // 数组元素
+        } else { /// 关于数组
             Value val = symbol.getValue();
-//            if (((PointerType) symbol.getValue().getType()).getRefType() instanceof PointerType) {
-//                val = IRBuilder.addLoadInst(symbol.getValue());
-//            }
-            Value index = exp.buildIR();
-            return IRBuilder.addGetElementPtrInst(val, index);
-        } else { // 数组指针
-            isArrayPara = true;
-            return IRBuilder.addGetElementPtrInst(symbol.getValue(), new ConstInteger(0, IntegerType.I32));
+            /// i32** 函数传参数组
+            if (lbrack != null) { // 数组元素
+                if (((PointerType) val.getType()).getRefType() instanceof PointerType) {
+                    val = IRBuilder.addLoadInst(symbol.getValue());
+                }
+                Value index = exp.buildIR();
+                return IRBuilder.addGetElementPtrInst(val, index);
+            } else { // 数组指针
+                isArrayPara = true;
+                if (((PointerType) val.getType()).getRefType() instanceof PointerType) {
+                    return IRBuilder.addLoadInst(symbol.getValue());
+                }
+                return IRBuilder.addGetElementPtrInst(val, new ConstInteger(0, IntegerType.I32));
+            }
         }
     }
 

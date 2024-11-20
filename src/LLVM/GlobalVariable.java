@@ -2,13 +2,14 @@ package LLVM;
 
 import LLVM.Type.IRType;
 import LLVM.Type.PointerType;
+import MIPS.MipsBuilder;
 
 import java.util.ArrayList;
 
 public class GlobalVariable extends Value {
-    IRType type;
-    ArrayList<ConstInteger> values = null;
-    String string = null;
+    private IRType type;
+    private ArrayList<ConstInteger> values = null;
+    private String string = null;
 
     /*
     int a
@@ -26,6 +27,10 @@ public class GlobalVariable extends Value {
         super("@" + name, new PointerType(type));
         this.type = type;
         this.string = string;
+    }
+
+    public boolean isString() {
+        return string != null;
     }
 
     public String toString() { // TODO: zeroinit...
@@ -55,5 +60,13 @@ public class GlobalVariable extends Value {
         }
         sb.append("\n");
         return sb.toString();
+    }
+
+    public void buildMips() {
+        if (string != null) {
+            MipsBuilder.addGlobalData(getName().substring(2), type, string);
+        } else {
+            MipsBuilder.addGlobalData(getName().substring(1), type, values);
+        }
     }
 }

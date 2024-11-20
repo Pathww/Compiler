@@ -11,6 +11,7 @@ import Symbol.SymbolTable;
 import Error.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StmtPrintf implements Stmt {
     private Token printfTk;
@@ -24,6 +25,7 @@ public class StmtPrintf implements Stmt {
     private static int cnt = 0;
 
     private ArrayList<String> strs = new ArrayList<>();
+    private static HashMap<String, Value> globalVariables = new HashMap<>();
 
     public StmtPrintf(Token printfTk, Token lparent, Token stringConst, ArrayList<Token> commas, ArrayList<Exp> exps, Token rparent, Token semicn) {
         this.printfTk = printfTk;
@@ -88,10 +90,14 @@ public class StmtPrintf implements Stmt {
                 index++;
             } else {
                 int len = str.length() + 1;
-//                String res = str.replace("\n", "\\0A");
-//                res += "\\00";
                 cnt++;
-                Value gv = IRBuilder.addGlobalVariable(".str." + cnt, new ArrayType(len, IntegerType.I8), str);
+                Value gv;
+                if (globalVariables.containsKey(str)) {
+                    gv = globalVariables.get(str);
+                } else {
+                    gv = IRBuilder.addGlobalVariable(".str." + cnt, new ArrayType(len, IntegerType.I8), str);
+                    globalVariables.put(str, gv);
+                }
                 Value pointer = IRBuilder.addGetElementPtrInst(gv, new ConstInteger(0, IntegerType.I32));
                 // TODO可不可以是I32？
                 ArrayList<Value> tmp = new ArrayList<>();

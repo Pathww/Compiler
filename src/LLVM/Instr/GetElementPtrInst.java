@@ -18,6 +18,15 @@ public class GetElementPtrInst extends Instruction {
         this.addValue(index, 1);
     }
 
+
+    public Value getPointer() {
+        return getValue(0);
+    }
+
+    public Value getIndex() {
+        return getValue(1);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

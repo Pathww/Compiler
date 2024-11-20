@@ -39,4 +39,13 @@ public class Module {
             SlotTracker.reset();
         }
     }
+
+    public void buildMips() {
+        for (GlobalVariable gv : globalVariables) {
+            gv.buildMips();
+        }
+        for (int i = functions.size() - 1; i >= 0; i--) {
+            functions.get(i).buildMips();
+        }
+    }
 }

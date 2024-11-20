@@ -2,6 +2,8 @@ package LLVM.Instr;
 
 import LLVM.Type.IRType;
 import LLVM.Type.PointerType;
+import MIPS.MipsBlock;
+import MIPS.MipsBuilder;
 
 public class AllocaInst extends Instruction {
     private IRType type;
@@ -14,5 +16,9 @@ public class AllocaInst extends Instruction {
     @Override
     public String toString() {
         return getName() + " = alloca " + type.toString() + "\n";
+    }
+
+    public void buildMips() {
+        MipsBuilder.allocGlobal(this, type);
     }
 }

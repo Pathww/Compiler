@@ -10,7 +10,6 @@ public class Value {
     private ArrayList<Use> uses = new ArrayList<>();
     //def-use
 
-    //    public boolean needName = true;
     public Value(String name, IRType type) {
         this.name = name;
         this.type = type;
@@ -31,9 +30,6 @@ public class Value {
     protected boolean hasName = true;
 
     public String getName() {
-//        if (name == null) {
-//            this.name = "%" + SlotTracker.alloc();
-//        }
         return name;
     }
 

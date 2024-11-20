@@ -2,6 +2,7 @@ package LLVM;
 
 import LLVM.Instr.Instruction;
 import LLVM.Type.IntegerType;
+import MIPS.MipsBuilder;
 
 import java.util.ArrayList;
 
@@ -48,5 +49,24 @@ public class BasicBlock extends Value {
         for (Instruction i : instrs) {
             i.setName();
         }
+    }
+
+    public void buildMips() {
+        MipsBuilder.addBlock(getName().substring(1));
+        if (allocas != null) {
+            for (Instruction i : allocas) {
+                i.buildMips();
+            }
+            MipsBuilder.fixGlobalStack();
+        }
+        for (Instruction i : instrs) {
+            System.out.println(i);
+            MipsBuilder.addComment("# " + i.toString());
+            i.buildMips();
+        }
+    }
+
+    public void removeLastReturn() {
+        instrs.remove(instrs.size() - 1);
     }
 }

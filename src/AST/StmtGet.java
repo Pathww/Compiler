@@ -3,6 +3,7 @@ package AST;
 import LLVM.IRBuilder;
 import LLVM.Instr.InstrType;
 import LLVM.Type.IntegerType;
+import LLVM.Type.PointerType;
 import LLVM.Value;
 import Lexer.Token;
 import Lexer.TokenType;
@@ -36,13 +37,20 @@ public class StmtGet implements Stmt {
     }
 
     public void buildIR() {
-        Value lValue = lVal.buildIR();
         Value callVal;
         if (getTk.getType() == TokenType.GETINTTK) {
             callVal = IRBuilder.addCallInst(IRBuilder.getint, new ArrayList<>());
         } else {
             callVal = IRBuilder.addCallInst(IRBuilder.getchar, new ArrayList<>());
-            callVal = IRBuilder.addConvertInst(InstrType.TRUNC, callVal, IntegerType.I8);
+            callVal = IRBuilder.addConvertInst(InstrType.TRUNC, callVal, IntegerType.I8); /// todo;mips需要吗？？？
+        }
+        Value lValue = lVal.buildIR();
+        if (callVal.getType() != ((PointerType) lValue.getType()).getRefType()) {
+            if (callVal.getType() == IntegerType.I8) {
+                callVal = IRBuilder.addConvertInst(InstrType.ZEXT, callVal, IntegerType.I32);
+            } else {
+                callVal = IRBuilder.addConvertInst(InstrType.TRUNC, callVal, IntegerType.I8);
+            }
         }
         IRBuilder.addStoreInst(callVal, lValue);
     }

@@ -14,6 +14,9 @@ public class Instruction extends User {
         this.type = instrType;
     }
 
+    public void buildMips() {
+    }
+
     public InstrType getInstrType() {
         return type;
     }

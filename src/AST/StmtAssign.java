@@ -31,8 +31,8 @@ public class StmtAssign implements Stmt {
     }
 
     public void buildIR() {
-        Value lValue = lVal.buildIR(); // TODO:两者的顺序？？？
         Value expValue = exp.buildIR();
+        Value lValue = lVal.buildIR(); /// 不可以交换顺序！！！
         if (expValue.getType() != ((PointerType) lValue.getType()).getRefType()) {
             if (expValue.getType() == IntegerType.I8) {
                 expValue = IRBuilder.addConvertInst(InstrType.ZEXT, expValue, IntegerType.I32);
