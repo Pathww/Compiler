@@ -8,6 +8,8 @@ import MIPS.Instr.MipsInstrType;
 import MIPS.MipsBuilder;
 import MIPS.Register;
 
+import java.util.ArrayList;
+
 public class ReturnInst extends Instruction {
     public ReturnInst() {
         super(InstrType.RET, IntegerType.VOID);
@@ -16,13 +18,12 @@ public class ReturnInst extends Instruction {
 
     public ReturnInst(Value value) {
         super(InstrType.RET, value.getType());
-        this.addValue(value, 0);
+        this.addValue(value);
         hasName = false;
     }
 
     public void buildMips() {
         if (getType() != IntegerType.VOID) {
-            /// todo; 处理寄存器的问题！！！
             Value ret = getValue(0);
             if (ret instanceof ConstInteger) {
                 MipsBuilder.addLoadInst(MipsInstrType.LI, Register.v0, new Immediate(ret.getName()));
@@ -44,5 +45,19 @@ public class ReturnInst extends Instruction {
         } else {
             return String.format("ret %s %s\n", getType().toString(), getValue(0).getName());
         }
+    }
+
+    public Value getDef() {
+        return null;
+    }
+
+    public ArrayList<Value> getUses() {
+        ArrayList<Value> uses = new ArrayList<>();
+        for (int i = 0; i < values.size(); i++) {
+            if (isLiveVar(values.get(i))) {
+                uses.add(values.get(i));
+            }
+        }
+        return uses;
     }
 }

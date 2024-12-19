@@ -17,9 +17,9 @@ import java.util.ArrayList;
 public class CallInst extends Instruction {
     public CallInst(Function func, ArrayList<Value> values) {
         super(InstrType.CALL, func.getType());
-        this.addValue(func, 0);
-        for (int i = 0; i < values.size(); i++) {
-            this.addValue(values.get(i), i + 1);
+        this.addValue(func);
+        for (Value value : values) {
+            this.addValue(value);
         }
         if (func.getType() == IntegerType.VOID) {
             hasName = false;
@@ -32,7 +32,10 @@ public class CallInst extends Instruction {
             case "@getint":
             case "@getchar":
                 MipsBuilder.addSyscallInst((func.getName().equals("@getint")) ? 5 : 12);
-                MipsBuilder.addMoveInst(MipsBuilder.allocTemp(this), Register.v0);
+                MipsBuilder.addMoveInst(MipsBuilder.getAllocReg(this), Register.v0);
+                if (MipsBuilder.isGlobal(this)) {
+                    MipsBuilder.writeBack(this);
+                }
                 return;
             case "@putint": /// 勿忘参数为常数的情况！！！
             case "@putch":
@@ -64,12 +67,17 @@ public class CallInst extends Instruction {
         }
         MipsBuilder.saveGlobals();
         MipsBuilder.saveTemps();
-//        MipsBuilder.clearTemps();
-        // 之后可以随意选择寄存器使用
+
         for (int i = values.size() - 1; i >= 1; i--) {
             Value value = getValue(i);
             if (i <= 3) { ///todo: 可以用a0吗？？？
                 Register reg = Register.get(i + 4);
+                for (int j = 1; j < i; j++) {
+                    if (MipsBuilder.hasAlloc(getValue(j)) && MipsBuilder.getAllocReg(getValue(j)) == reg) {
+                        MipsBuilder.writeBack(getValue(j));
+                        break;
+                    }
+                }
                 if (value instanceof ConstInteger) {
                     MipsBuilder.addLoadInst(MipsInstrType.LI, reg, new Immediate(value.getName()));
                 } else if (value instanceof GlobalVariable) { /// 会有这种情况吗？？？ SSA会遇到？？？
@@ -93,7 +101,12 @@ public class CallInst extends Instruction {
                     }
                 } else {
                     if (MipsBuilder.hasAlloc(value)) {
-                        MipsBuilder.addMoveInst(reg, MipsBuilder.getAllocReg(value));
+                        if (MipsBuilder.getAllocReg(value).no > i + 4 && MipsBuilder.getAllocReg(value).no <= 7 && values.size() - 1 >= MipsBuilder.getAllocReg(value).no - 4) {
+                            int offset = MipsBuilder.getOffset(value);
+                            MipsBuilder.addLoadInst(reg, new Immediate(offset), Register.sp);
+                        } else {
+                            MipsBuilder.addMoveInst(reg, MipsBuilder.getAllocReg(value));
+                        }
                     } else {
                         int offset = MipsBuilder.getOffset(value);
                         MipsBuilder.addLoadInst(reg, new Immediate(offset), Register.sp);
@@ -140,8 +153,7 @@ public class CallInst extends Instruction {
                 }
             }
         }
-        /// 优化措施？？？
-//        MipsBuilder.clearGlobals();
+
         MipsBuilder.clearTemps();
 
         int offset = MipsBuilder.getOffset();
@@ -154,14 +166,16 @@ public class CallInst extends Instruction {
         }
 
         MipsBuilder.restoreGlobals();
-//        MipsBuilder.restoreTemps();
 
         if (!MipsBuilder.curFunction.getName().equals("main")) {
             MipsBuilder.addLoadInst(Register.ra, new Immediate(raOffset), Register.sp);
         }
 
         if (getType() != IntegerType.VOID) {
-            MipsBuilder.addMoveInst(MipsBuilder.allocTemp(this), Register.v0);
+            MipsBuilder.addMoveInst(MipsBuilder.getAllocReg(this), Register.v0);
+            if (MipsBuilder.isGlobal(this)) {
+                MipsBuilder.writeBack(this);
+            }
         }
     }
 
@@ -180,5 +194,22 @@ public class CallInst extends Instruction {
         }
         sb.append(")\n");
         return sb.toString();
+    }
+
+    public Value getDef() {
+        if (hasName) {
+            return this;
+        }
+        return null;
+    }
+
+    public ArrayList<Value> getUses() {
+        ArrayList<Value> uses = new ArrayList<>();
+        for (int i = 1; i < values.size(); i++) {
+            if (isLiveVar(values.get(i))) {
+                uses.add(values.get(i));
+            }
+        }
+        return uses;
     }
 }

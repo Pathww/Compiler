@@ -1,13 +1,14 @@
 package MIPS;
 
+import LLVM.BasicBlock;
 import LLVM.ConstInteger;
+import LLVM.Instr.VarInst;
 import LLVM.Type.ArrayType;
 import LLVM.Type.IRType;
 import LLVM.Value;
 import MIPS.Instr.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 public class MipsBuilder {
     public static MipsModule module = new MipsModule();
@@ -18,20 +19,25 @@ public class MipsBuilder {
     private static HashMap<Value, Integer> allocValues;
     private static HashMap<Integer, Value> allocRegs;
 
-    private static ArrayList<Integer> globals = new ArrayList<>();
-    private static ArrayList<Integer> globalsUsed;
-    private static ArrayList<Integer> temps = new ArrayList<>();
+    private static ArrayList<Integer> globals;
+    private static HashSet<Integer> globalsUsed;
+    private static ArrayList<Integer> temps;
     private static ArrayList<Integer> tempsUsed = new ArrayList<>();
 
-    //    private static HashSet<Value> globalValues;
+    private static HashSet<Value> globalValues;
+    private static HashMap<Value, Integer> globalRefs;
 
     private static int offset = 0;
     private static int globalOffset = 0;
 
-    static {
+    /// 保证offset一致性！！！
+    private static void initRegs() {
+        globals = new ArrayList<>();
+        temps = new ArrayList<>();
         for (int i = 16; i <= 23; i++) {
             globals.add(i);
         }
+
         for (int i = 8; i <= 15; i++) {
             temps.add(i);
         }
@@ -40,7 +46,91 @@ public class MipsBuilder {
         }
         temps.add(30);
         temps.add(3);
-        /// v1 也没用到
+    }
+
+    public static boolean isGlobal(Value value) {
+        if (globalValues.contains(value) && tempsUsed.contains(allocValues.get(value))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static void writeBack(Value value) {
+        if (offsets.containsKey(value)) {
+            addStoreInst(Register.get(allocValues.get(value)), new Immediate(offsets.get(value)), Register.sp);
+        } else {
+            offset -= 4;
+            offsets.put(value, offset);
+            addStoreInst(Register.get(allocValues.get(value)), new Immediate(offset), Register.sp);
+        }
+    }
+
+    public static void allocGlobals(ArrayList<BasicBlock> blocks) {
+        globalValues = new HashSet<>();
+        globalRefs = new HashMap<>();
+
+        for (BasicBlock block : blocks) {
+            globalValues.addAll(block.liveIn); /// 需要out吗？？？
+        }
+        for (Value value : globalValues) {
+            globalRefs.put(value, 0);
+        }
+        CountRefs(blocks);
+
+        List<Map.Entry<Value, Integer>> list = new ArrayList<>(globalRefs.entrySet());
+        list.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+        for (Map.Entry<Value, Integer> entry : list) {
+            Value value = entry.getKey();
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+            if (value.isParam) {
+                if (allocValues.containsKey(value)) {
+                    offset -= 4;
+                    offsets.put(value, offset);
+                    globalsUsed.add(allocValues.get(value));
+                } else {
+                    for (int i : globals) { /// s0-s7
+                        if (!allocRegs.containsKey(i)) {
+                            allocValues.put(value, i);
+                            allocRegs.put(i, value);
+                            globalsUsed.add(i);
+                            LoadInst loadInst = new LoadInst(Register.get(i), new Immediate(offsets.get(value)), Register.sp);
+                            curFunction.addInitInstr(loadInst);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                allocGlobal(value, value.getType());
+            }
+        }
+        Iterator<Integer> it = globals.iterator();
+        while (it.hasNext()) {
+            int i = it.next();
+            if (!allocRegs.containsKey(i)) {
+                temps.add(i);
+                it.remove();
+            }
+        }
+        globalOffset = offset;
+    }
+
+    private static void CountRefs(ArrayList<BasicBlock> blocks) {
+        for (BasicBlock block : blocks) {
+            int loop = (int) Math.pow(5, block.loopDepth);
+            for (LLVM.Instr.Instruction instr : block.instrs) {
+                if (instr instanceof VarInst) {
+                    continue;
+                }
+                if (globalValues.contains(instr)) {
+                    globalRefs.put(instr, globalRefs.get(instr) + loop);
+                }
+                for (Value value : instr.values) {
+                    if (globalValues.contains(value)) {
+                        globalRefs.put(value, globalRefs.get(value) + loop);
+                    }
+                }
+            }
+        }
     }
 
     public static Operand addFunction(String name) {
@@ -52,15 +142,16 @@ public class MipsBuilder {
         offsets = new HashMap<>();
         allocValues = new HashMap<>();
         allocRegs = new HashMap<>();
-        globalsUsed = new ArrayList<>();
+        globalsUsed = new HashSet<>();
+        initRegs();
         return f;
     }
 
-    public static Operand addBlock(String name) {
-        offset = globalOffset; // 对吗？？？？
+    public static Operand addBlock(String name, HashMap<Value, Integer> lastUse) {
+        offset = globalOffset;
         clearTemps();
         tempsUsed = new ArrayList<>(); /// 放到这里对吗？？？
-        MipsBlock b = new MipsBlock(curFunction.getName() + "_" + name);
+        MipsBlock b = new MipsBlock(curFunction.getName() + "_" + name, lastUse);
         curFunction.addBlock(b);
         curBlock = b;
         return b;
@@ -84,6 +175,7 @@ public class MipsBuilder {
     public static void addParams(ArrayList<Value> params) {
         ///todo: 没有使用 a0
         for (int i = 0; i < params.size(); i++) {
+            params.get(i).isParam = true;
             if (i < 3) {
                 allocValues.put(params.get(i), 5 + i);
                 allocRegs.put(5 + i, params.get(i));
@@ -161,21 +253,17 @@ public class MipsBuilder {
                 if (!allocRegs.containsKey(i)) {
                     allocValues.put(value, i);
                     allocRegs.put(i, value);
-                    globalsUsed.add(i);
+//                    globalsUsed.add(i);
                     break;
                 }
             }
         }
         offsets.put(value, offset);
-        ///todo: 把剩余的加入到temp中
     }
 
+    static public int pos = 0;
+
     public static Register allocTemp(Value value) {
-        /// 生存范围不超过基本块，不跨越函数调用，这样对吗？？？？试！！！
-        /// todo：如何判断变量不跨越基本块？？？
-        ///restore global values 现在有函数用吗？？？
-
-
         for (int i : temps) {
             if (!allocRegs.containsKey(i)) {
                 allocValues.put(value, i);
@@ -187,13 +275,18 @@ public class MipsBuilder {
 
         int reg = tempsUsed.remove(0);
         Value save = allocRegs.get(reg);
-        if (offsets.containsKey(save)) {
-            addStoreInst(Register.get(reg), new Immediate(offsets.get(save)), Register.sp);
-        } else {
-            offset -= 4;
-            offsets.put(save, offset);
-            addStoreInst(Register.get(reg), new Immediate(offset), Register.sp);
+        if (!globalValues.contains(save)) {
+            if (curBlock.lastUse.containsKey(save) && curBlock.lastUse.get(save) > pos) {
+                if (offsets.containsKey(save)) {
+                    addStoreInst(Register.get(reg), new Immediate(offsets.get(save)), Register.sp);
+                } else {
+                    offset -= 4;
+                    offsets.put(save, offset);
+                    addStoreInst(Register.get(reg), new Immediate(offset), Register.sp);
+                }
+            }
         }
+
         allocValues.remove(save);
 
         allocRegs.put(reg, value);
@@ -209,15 +302,7 @@ public class MipsBuilder {
         }
     }
 
-    public static void clearGlobals() { ///todo 未修改
-        for (int i : globalsUsed) {
-            Value value = allocRegs.remove(i);
-            allocValues.remove(value);
-        }
-//        globalsUsed = new ArrayList<>();
-    }
-
-    public static void restoreGlobals() { ///todo 未修改
+    public static void restoreGlobals() {
         for (int i : globalsUsed) {
             Value value = allocRegs.get(i);
             addLoadInst(Register.get(i), new Immediate(offsets.get(value)), Register.sp);
@@ -226,11 +311,16 @@ public class MipsBuilder {
 
     public static void saveTemps() {
         for (int i : tempsUsed) {
-            offset -= 4; /// 优化！！！
-            offsets.put(allocRegs.get(i), offset);
-            addStoreInst(Register.get(i), new Immediate(offset), Register.sp);
+            if (globalValues.contains(allocRegs.get(i))) {
+                continue;
+            }
+            Value save = allocRegs.get(i);
+            if (curBlock.lastUse.containsKey(save) && curBlock.lastUse.get(save) > pos) {
+                offset -= 4;
+                offsets.put(allocRegs.get(i), offset);
+                addStoreInst(Register.get(i), new Immediate(offset), Register.sp);
+            }
         }
-        // 用到的时候再从内存中取，不用接着全取出来？？？
     }
 
     public static void clearTemps() {
@@ -241,32 +331,27 @@ public class MipsBuilder {
         tempsUsed = new ArrayList<>();
     }
 
-    public static void restoreTemps() {
-        for (int i : tempsUsed) {
-            Value value = allocRegs.get(i);
-            addLoadInst(Register.get(i), new Immediate(offsets.get(value)), Register.sp);
-        }
-    }
-
     public static boolean hasAlloc(Value value) {
         return allocValues.containsKey(value);
     }
 
     public static Register getAllocReg(Value value) {
         if (allocValues.containsKey(value)) {
-            return getAllocedReg(value);
+            int reg = allocValues.get(value);
+            if (globals.contains(reg)) { /// 不能有a0-a3？？？
+                globalsUsed.add(reg);
+            }
+            if (tempsUsed.remove((Integer) reg)) { /// 勿忘维护！！！
+                tempsUsed.add(reg);
+            }
+            return Register.get(reg);
+        } else if (offsets.containsKey(value)) {
+            Register reg = allocTemp(value);
+            addLoadInst(reg, new Immediate(getOffset(value)), Register.sp);
+            return reg;
+        } else {
+            return allocTemp(value);
         }
-        Register reg = allocTemp(value);
-        addLoadInst(reg, new Immediate(getOffset(value)), Register.sp);
-        return reg;
-    }
-
-    public static Register getAllocedReg(Value value) {
-        int reg = allocValues.get(value);
-        if (tempsUsed.remove((Integer) reg)) { /// 勿忘维护！！！
-            tempsUsed.add(reg);
-        }
-        return Register.get(reg);
     }
 
     public static int addOffset(int off) {
@@ -282,17 +367,11 @@ public class MipsBuilder {
         return offsets.get(value);
     }
 
-    public static void fixGlobalStack() {
-        globalOffset = offset;
-        /// todo: 没用到的加入temp reg
+    public static boolean hasOffset(Value value) {
+        return offsets.containsKey(value);
     }
 
-    public static void setReturnValue(Value value) {
-        if (allocRegs.containsKey(2)) { /// $v0
-            Value pre = allocRegs.remove(2);
-            allocValues.remove(pre);
-        }
-        allocValues.put(value, 2);
-        allocRegs.put(2, value);
+    public static void fixGlobalStack() {
+        globalOffset = offset;
     }
 }

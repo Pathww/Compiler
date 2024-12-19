@@ -33,6 +33,7 @@ public class IRBuilder {
         } else {
             curBlock.addInstr(instr);
         }
+        instr.setBasicBlock(curBlock);
     }
 
     public static Value addFunction(String name, IRType type) {
@@ -161,8 +162,16 @@ public class IRBuilder {
         return storeInst;
     }
 
+    public static Instruction addPhiInst(BasicBlock block, IRType type) {
+        PhiInst phiInst = new PhiInst(type);
+        block.instrs.add(0, phiInst);
+        phiInst.setBasicBlock(block);
+        return phiInst;
+    }
+
     public static Value addParam(IRType type) {
         Value param = new Value(type);
+        param.isParam = true;
         curFunction.addParam(param);
         return param;
     }

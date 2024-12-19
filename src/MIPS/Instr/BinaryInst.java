@@ -26,6 +26,9 @@ public class BinaryInst extends Instruction {
         } else if (instrType == MipsInstrType.REM) {
             sb.append(String.format("%s %s, %s\n", instrType, left, right));
             sb.append(String.format("\tmfhi %s\n", result));
+        } else if (instrType == MipsInstrType.MULSH) {
+            sb.append(String.format("mult %s, %s\n", left, right));
+            sb.append(String.format("\tmfhi %s\n", result));
         } else {
             sb.append(String.format("%s %s, %s, %s\n", instrType, result, left, right));
         }

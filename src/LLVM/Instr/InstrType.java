@@ -14,7 +14,11 @@ public enum InstrType {
     LOAD("load"),
     STORE("store"),
     GEP("getelementptr"),
+
     PHI("phi"),
+    MOVE("move"),
+    VAR("var"),
+
     ZEXT("zext"),
     TRUNC("trunc"),
     BR("br"),

@@ -3,8 +3,8 @@ package LLVM;
 import java.util.ArrayList;
 
 public class Module {
-    ArrayList<GlobalVariable> globalVariables = new ArrayList<>();
-    ArrayList<Function> functions = new ArrayList<>();
+    public ArrayList<GlobalVariable> globalVariables = new ArrayList<>();
+    public ArrayList<Function> functions = new ArrayList<>();
 
     public void addGlobalVariable(GlobalVariable gv) {
         globalVariables.add(gv);

@@ -1,14 +1,19 @@
 package MIPS;
 
+import LLVM.Value;
 import MIPS.Instr.Instruction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class MipsBlock extends Operand {
     public ArrayList<Instruction> instrs = new ArrayList<>();
+    public HashMap<Value, Integer> lastUse;
 
-    public MipsBlock(String name) {
+    public MipsBlock(String name, HashMap<Value, Integer> lastUse) {
         super(name);
+        this.lastUse = lastUse;
     }
 
     public void addInstr(Instruction i) {

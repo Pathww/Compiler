@@ -23,6 +23,11 @@ public class MipsModule {
             }
             sb.append("\n.text\n");
         }
+        if (functions.size() == 1) {
+            int size = functions.get(0).blocks.size();
+            int idx = functions.get(0).blocks.get(size - 1).instrs.size();
+            functions.get(0).blocks.get(size - 1).instrs.remove(idx - 1);
+        }
         for (MipsFunction f : functions) {
             sb.append(f.toString());
         }

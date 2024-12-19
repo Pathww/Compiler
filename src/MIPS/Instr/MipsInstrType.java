@@ -10,7 +10,11 @@ public enum MipsInstrType {
     REM("div"),
     AND("and"),
     OR("or"),
+    XORI("xori"),
     SLL("sll"),
+    SRA("sra"),
+    SRL("srl"),
+    MULSH("mulsh"),
 
     LI("li"),
     LA("la"),

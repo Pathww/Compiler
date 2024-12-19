@@ -1,6 +1,7 @@
 package AST;
 
 import LLVM.ConstInteger;
+import LLVM.GlobalVariable;
 import LLVM.IRBuilder;
 import LLVM.Type.ArrayType;
 import LLVM.Type.IRType;
@@ -88,6 +89,7 @@ public class ConstDef {
             } else {
                 symbolValue = IRBuilder.addGlobalVariable(symbol.getIdent(), new ArrayType(symbol.getLength(), type), symbol.getInitVals());
             }
+            ((GlobalVariable) symbolValue).isConst = true;
         } else {
             if (symbol.isInt() || symbol.isChar()) {
                 IRType type = (symbol.isInt()) ? IntegerType.I32 : IntegerType.I8;

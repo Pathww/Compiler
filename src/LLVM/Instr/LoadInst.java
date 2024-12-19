@@ -10,19 +10,18 @@ import MIPS.MipsBuilder;
 import MIPS.Operand;
 import MIPS.Register;
 
+import java.util.ArrayList;
+
 public class LoadInst extends Instruction {
     public LoadInst(Value pointer) {
         super(InstrType.LOAD, ((PointerType) pointer.getType()).getRefType());
-        this.addValue(pointer, 0);
+        this.addValue(pointer);
     }
 
     public void buildMips() {
         Operand rt;
-        if (MipsBuilder.hasAlloc(this)) {
-            rt = MipsBuilder.getAllocReg(this);
-        } else {
-            rt = MipsBuilder.allocTemp(this);
-        }
+        rt = MipsBuilder.getAllocReg(this);
+
         Value pointer = getValue(0);
         if (pointer instanceof GlobalVariable) {
             MipsBuilder.addLoadInst(rt, new Operand(pointer.getName().substring(1)), Register.zero);
@@ -45,7 +44,7 @@ public class LoadInst extends Instruction {
                 }
                 MipsBuilder.addLoadInst(rt, new Operand(pointer.getName().substring(1)), base);
             } else { // 局部数组
-                if (MipsBuilder.hasAlloc(pointer) || pointer instanceof LoadInst) { /// 函数参数；数组
+                if (MipsBuilder.hasAlloc(pointer) || pointer instanceof LoadInst || pointer.isParam) { /// 函数参数；数组
                     Operand base; /// 和前面的globalvalue类似
                     if (index instanceof ConstInteger) {
                         base = new Immediate(((ConstInteger) index).getValue() * 4);
@@ -78,10 +77,25 @@ public class LoadInst extends Instruction {
                 MipsBuilder.addLoadInst(rt, new Immediate(offset), Register.sp);
             }
         }
+        if (MipsBuilder.isGlobal(this)) {
+            MipsBuilder.writeBack(this);
+        }
     }
 
     @Override
     public String toString() {
         return String.format("%s = load %s, %s %s\n", getName(), getType(), getValue(0).getType(), getValue(0).getName());
+    }
+
+    public Value getDef() {
+        return this;
+    }
+
+    public ArrayList<Value> getUses() {
+        ArrayList<Value> uses = new ArrayList<>();
+        if (isLiveVar(getValue(0))) {
+            uses.add(getValue(0));
+        }
+        return uses;
     }
 }

@@ -7,6 +7,7 @@ import LLVM.*;
 import Lexer.*;
 import Error.*;
 import MIPS.*;
+import Optimizer.*;
 import Parser.*;
 import Symbol.*;
 
@@ -37,46 +38,15 @@ public class Compiler {
             return;
         }
 
-//        try {
         compUnit.buildIR();
-//        } catch (Exception e) {
-//            StackTraceElement stackTraceElement = e.getStackTrace()[0];
-//            System.out.println(stackTraceElement.getClassName());
-//            if (stackTraceElement.getClassName().equals("Symbol.Symbol")) {
-//
-//            } else {
-//                e.printStackTrace();
-//            }
-//        }
+        Optimizer optimizer = new Optimizer();
 
-        IRBuilder.module.allocName();
+//        IRBuilder.module.allocName();
         FileWriter fw = new FileWriter("llvm_ir.txt");
         fw.write(IRBuilder.module.toString());
-//        fw.write("define i32 @main() {\n" +
-//                "\tret i32 0\n"
-//                "}");
         fw.close();
 
-//        try {
         IRBuilder.module.buildMips();
-//        } catch (Exception e) {
-//            /// getAllocedReg
-//            StackTraceElement stackTraceElement = e.getStackTrace()[2];
-//            System.out.println(stackTraceElement.getMethodName());
-//            System.out.println(stackTraceElement.getClassName());
-//            if (stackTraceElement.getClassName().equals("LLVM.Instr.CallInst")) {
-//                System.out.println("store load");
-//                e.printStackTrace();
-//            } else {
-//                e.printStackTrace();
-//            }
-
-//            if (e instanceof NullPointerException ) {
-//                System.out.println("null pointer");
-//            }else {
-//                e.printStackTrace();
-//            }
-//        }
 
         fw = new FileWriter("mips.txt");
         fw.write(MipsBuilder.module.toString());

@@ -2,12 +2,14 @@ package MIPS;
 
 import MIPS.Instr.BranchInst;
 import MIPS.Instr.Instruction;
+import MIPS.Instr.LoadInst;
 import MIPS.Instr.MipsInstrType;
 
 import java.util.ArrayList;
 
 public class MipsFunction extends Operand {
-    private ArrayList<MipsBlock> blocks = new ArrayList<>();
+    public ArrayList<MipsBlock> blocks = new ArrayList<>();
+    private ArrayList<Instruction> initInstrs;
 
     public MipsFunction(String name) {
         super(name);
@@ -30,9 +32,21 @@ public class MipsFunction extends Operand {
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%s:\n", getName()));
+        if (initInstrs != null) {
+            for (Instruction instr : initInstrs) {
+                sb.append("\t").append(instr.toString());
+            }
+        }
         for (MipsBlock b : blocks) {
             sb.append(b.toString());
         }
         return sb.toString();
+    }
+
+    public void addInitInstr(Instruction instr) {
+        if (initInstrs == null) {
+            initInstrs = new ArrayList<>();
+        }
+        initInstrs.add(instr);
     }
 }

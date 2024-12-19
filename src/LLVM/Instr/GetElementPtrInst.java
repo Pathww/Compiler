@@ -5,6 +5,8 @@ import LLVM.Type.IRType;
 import LLVM.Type.PointerType;
 import LLVM.Value;
 
+import java.util.ArrayList;
+
 public class GetElementPtrInst extends Instruction {
     private IRType refType;
 
@@ -14,8 +16,8 @@ public class GetElementPtrInst extends Instruction {
         if (refType.isArray()) {
             setType(new PointerType(((ArrayType) refType).getElmType()));
         }
-        this.addValue(pointer, 0);
-        this.addValue(index, 1);
+        this.addValue(pointer);
+        this.addValue(index);
     }
 
 
@@ -33,10 +35,25 @@ public class GetElementPtrInst extends Instruction {
         sb.append(String.format("%s = getelementptr inbounds %s, %s %s, ", getName(), ((PointerType) getValue(0).getType()).getRefType(),
                 getValue(0).getType(), getValue(0).getName()));
 
+        refType = ((PointerType) getPointer().getType()).getRefType();
         if (refType.isArray()) {
             sb.append("i32 0, ");
         }
         sb.append(String.format("%s %s\n", getValue(1).getType(), getValue(1).getName()));
         return sb.toString();
+    }
+
+    public Value getDef() {
+        return this;
+    }
+
+    public ArrayList<Value> getUses() {
+        ArrayList<Value> uses = new ArrayList<>();
+        for (int i = 0; i < values.size(); i++) {
+            if (isLiveVar(values.get(i))) {
+                uses.add(values.get(i));
+            }
+        }
+        return uses;
     }
 }

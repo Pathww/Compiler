@@ -4,42 +4,44 @@ import java.util.HashMap;
 
 public class Register extends Operand {
     public static HashMap<Integer, Register> regs = new HashMap<>();
+    public int no;
 
-    public static Register zero = new Register("$0");
-    public static Register at = new Register("$at");
-    public static Register v0 = new Register("$v0");
-    public static Register v1 = new Register("$v1");
-    public static Register a0 = new Register("$a0");
-    public static Register a1 = new Register("$a1");
-    public static Register a2 = new Register("$a2");
-    public static Register a3 = new Register("$a3");
-    public static Register t0 = new Register("$t0");
-    public static Register t1 = new Register("$t1");
-    public static Register t2 = new Register("$t2");
-    public static Register t3 = new Register("$t3");
-    public static Register t4 = new Register("$t4");
-    public static Register t5 = new Register("$t5");
-    public static Register t6 = new Register("$t6");
-    public static Register t7 = new Register("$t7");
-    public static Register s0 = new Register("$s0");
-    public static Register s1 = new Register("$s1");
-    public static Register s2 = new Register("$s2");
-    public static Register s3 = new Register("$s3");
-    public static Register s4 = new Register("$s4");
-    public static Register s5 = new Register("$s5");
-    public static Register s6 = new Register("$s6");
-    public static Register s7 = new Register("$s7");
-    public static Register t8 = new Register("$t8");
-    public static Register t9 = new Register("$t9");
-    public static Register k0 = new Register("$k0");
-    public static Register k1 = new Register("$k1");
-    public static Register gp = new Register("$gp");
-    public static Register sp = new Register("$sp");
-    public static Register fp = new Register("$fp");
-    public static Register ra = new Register("$ra");
+    public static Register zero = new Register("$0", 0);
+    public static Register at = new Register("$at", 1);
+    public static Register v0 = new Register("$v0", 2);
+    public static Register v1 = new Register("$v1", 3);
+    public static Register a0 = new Register("$a0", 4);
+    public static Register a1 = new Register("$a1", 5);
+    public static Register a2 = new Register("$a2", 6);
+    public static Register a3 = new Register("$a3", 7);
+    public static Register t0 = new Register("$t0", 8);
+    public static Register t1 = new Register("$t1", 9);
+    public static Register t2 = new Register("$t2", 10);
+    public static Register t3 = new Register("$t3", 11);
+    public static Register t4 = new Register("$t4", 12);
+    public static Register t5 = new Register("$t5", 13);
+    public static Register t6 = new Register("$t6", 14);
+    public static Register t7 = new Register("$t7", 15);
+    public static Register s0 = new Register("$s0", 16);
+    public static Register s1 = new Register("$s1", 17);
+    public static Register s2 = new Register("$s2", 18);
+    public static Register s3 = new Register("$s3", 19);
+    public static Register s4 = new Register("$s4", 20);
+    public static Register s5 = new Register("$s5", 21);
+    public static Register s6 = new Register("$s6", 22);
+    public static Register s7 = new Register("$s7", 23);
+    public static Register t8 = new Register("$t8", 24);
+    public static Register t9 = new Register("$t9", 25);
+    public static Register k0 = new Register("$k0", 26);
+    public static Register k1 = new Register("$k1", 27);
+    public static Register gp = new Register("$gp", 28);
+    public static Register sp = new Register("$sp", 29);
+    public static Register fp = new Register("$fp", 30);
+    public static Register ra = new Register("$ra", 31);
 
-    private Register(String name) {
+    private Register(String name, int no) {
         super(name);
+        this.no = no;
     }
 
     static {

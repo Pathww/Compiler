@@ -1,13 +1,15 @@
 package LLVM.Instr;
 
-import LLVM.BasicBlock;
+import LLVM.*;
 import LLVM.Type.IRType;
-import LLVM.User;
+
+import java.util.ArrayList;
 
 public class Instruction extends User {
 
     private InstrType type;
-    private BasicBlock basicBlock;
+    public BasicBlock curBlock;
+    public int index;
 
     public Instruction(InstrType instrType, IRType irType) {
         super(irType);
@@ -19,5 +21,32 @@ public class Instruction extends User {
 
     public InstrType getInstrType() {
         return type;
+    }
+
+    public void setBasicBlock(BasicBlock basicBlock) {
+        this.curBlock = basicBlock;
+    }
+
+    public Value getDef() {
+        return null;
+    }
+
+    public ArrayList<Value> getUses() {
+        return new ArrayList<>();
+    }
+
+    public boolean isLiveVar(Value value) {
+        if (value instanceof ConstInteger || value instanceof GlobalVariable || value instanceof AllocaInst) {
+            return false;
+        }
+        return true;
+    }
+
+    public void setInstrType(InstrType type) {
+        this.type = type;
+    }
+
+    public String hash() {
+        return null;
     }
 }

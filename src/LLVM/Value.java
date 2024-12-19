@@ -7,7 +7,8 @@ import java.util.ArrayList;
 public class Value {
     private String name = null;
     private IRType type;
-    private ArrayList<Use> uses = new ArrayList<>();
+    public ArrayList<Use> uses = new ArrayList<>();
+    public boolean isParam = false;
     //def-use
 
     public Value(String name, IRType type) {

@@ -1,14 +1,15 @@
 package LLVM;
 
 import LLVM.Instr.Instruction;
+import LLVM.Instr.VarInst;
 import LLVM.Type.IRType;
 import MIPS.MipsBuilder;
 
 import java.util.ArrayList;
 
 public class Function extends Value {
-    private ArrayList<Value> params = new ArrayList<>();
-    private ArrayList<BasicBlock> blocks = new ArrayList<>();
+    public ArrayList<Value> params = new ArrayList<>();
+    public ArrayList<BasicBlock> blocks = new ArrayList<>();
 
     public Function(String name, IRType type) {
         super("@" + name, type);
@@ -24,6 +25,12 @@ public class Function extends Value {
 
     public void addBlock(BasicBlock block) {
         blocks.add(block);
+        block.curFunc = this;
+    }
+
+    public void addBlock(int index, BasicBlock block) {
+        blocks.add(index, block);
+        block.curFunc = this;
     }
 
     public void addAlloca(Instruction i) {
@@ -61,6 +68,7 @@ public class Function extends Value {
     public void buildMips() {
         MipsBuilder.addFunction(getName().substring(1));
         MipsBuilder.addParams(params);
+        MipsBuilder.allocGlobals(blocks);
 
         if (getName().equals("@main")) {
             blocks.get(blocks.size() - 1).removeLastReturn();

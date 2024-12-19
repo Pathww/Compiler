@@ -10,16 +10,17 @@ import MIPS.MipsBuilder;
 import MIPS.Operand;
 import MIPS.Register;
 
+import java.util.ArrayList;
+
 public class StoreInst extends Instruction {
     public StoreInst(Value value, Value pointer) {
         super(InstrType.STORE, IntegerType.VOID);
-        this.addValue(value, 0);
-        this.addValue(pointer, 1);
+        this.addValue(value);
+        this.addValue(pointer);
         hasName = false;
     }
 
     public void buildMips() {
-        /// todo;有些寄存器用完可以接着释放，添加一个释放寄存器的方法？？？？release？？？
         Value value = getValue(0);
         Value pointer = getValue(1);
         if (pointer instanceof GlobalVariable) { // 全局变量一定为地址，无寄存器
@@ -28,7 +29,7 @@ public class StoreInst extends Instruction {
                 if (((ConstInteger) value).getValue() == 0) {
                     rs = Register.zero;
                 } else {
-                    rs = MipsBuilder.allocTemp(value);
+                    rs = MipsBuilder.getAllocReg(value);
                     MipsBuilder.addLoadInst(MipsInstrType.LI, rs, new Immediate(value.getName()));
                 }
             } else {
@@ -41,7 +42,7 @@ public class StoreInst extends Instruction {
                 if (((ConstInteger) value).getValue() == 0) {
                     rt = Register.zero;
                 } else {
-                    rt = MipsBuilder.allocTemp(value);
+                    rt = MipsBuilder.getAllocReg(value);
                     MipsBuilder.addLoadInst(MipsInstrType.LI, rt, new Immediate(value.getName()));
                 }
             } else {
@@ -66,8 +67,8 @@ public class StoreInst extends Instruction {
                 }
                 MipsBuilder.addStoreInst(rt, new Operand(pointer.getName().substring(1)), base);
             } else { // 局部数组
-                if (MipsBuilder.hasAlloc(pointer) || pointer instanceof LoadInst) { /// 函数参数；数组 分配寄存器/存到栈上
-                    Operand base; /// 和前面的globalvalue类似，转SSA会不会有问题？？？
+                if (MipsBuilder.hasAlloc(pointer) || pointer instanceof LoadInst || pointer.isParam) { /// 函数参数；数组 分配寄存器/存到栈上
+                    Operand base;
                     if (index instanceof ConstInteger) {
                         base = new Immediate(((ConstInteger) index).getValue() * 4);
                         MipsBuilder.addStoreInst(rt, base, MipsBuilder.getAllocReg(pointer));
@@ -125,5 +126,19 @@ public class StoreInst extends Instruction {
     @Override
     public String toString() {
         return String.format("store %s %s, %s %s\n", getValue(0).getType(), getValue(0).getName(), getValue(1).getType(), getValue(1).getName());
+    }
+
+    public Value getDef() {
+        return null;
+    }
+
+    public ArrayList<Value> getUses() {
+        ArrayList<Value> uses = new ArrayList<>();
+        for (int i = 0; i < values.size(); i++) {
+            if (isLiveVar(values.get(i))) {
+                uses.add(values.get(i));
+            }
+        }
+        return uses;
     }
 }
