@@ -17,6 +17,7 @@ public class Function extends Value {
 
     public void addParam(Value v) {
         params.add(v);
+        v.isParam = true;
     }
 
     public ArrayList<Value> getParams() {

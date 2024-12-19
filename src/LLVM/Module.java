@@ -27,14 +27,12 @@ public class Module {
         sb.append("\n");
         for (Function f : functions) {
             sb.append(f.toString());
-            SlotTracker.reset();
         }
         return sb.toString();
     }
 
     public void allocName() {
         for (Function f : functions) {
-            f.setName();
             f.allocName();
             SlotTracker.reset();
         }

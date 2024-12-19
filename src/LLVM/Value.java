@@ -9,7 +9,7 @@ public class Value {
     private IRType type;
     public ArrayList<Use> uses = new ArrayList<>();
     public boolean isParam = false;
-    //def-use
+    protected boolean hasName = true;
 
     public Value(String name, IRType type) {
         this.name = name;
@@ -28,16 +28,15 @@ public class Value {
         uses.add(use);
     }
 
-    protected boolean hasName = true;
-
     public String getName() {
         return name;
     }
 
     public void setName() {
-        if (name == null && hasName) {
-            this.name = "%" + SlotTracker.alloc();
+        if (this instanceof GlobalVariable || this instanceof Function || this instanceof ConstInteger || !hasName) {
+            return;
         }
+        this.name = "%" + SlotTracker.alloc();
     }
 
     public String toString() {

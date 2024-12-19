@@ -175,7 +175,6 @@ public class MipsBuilder {
     public static void addParams(ArrayList<Value> params) {
         ///todo: 没有使用 a0
         for (int i = 0; i < params.size(); i++) {
-            params.get(i).isParam = true;
             if (i < 3) {
                 allocValues.put(params.get(i), 5 + i);
                 allocRegs.put(5 + i, params.get(i));
